@@ -1,7 +1,7 @@
 {
   "name": "container-image-builder",
   "version": "1.0.0",
-  "description": "container registry client. without docker, docker/oci registry client and image building helpers for protocol version 2",
+  "description": "container image builder. without docker, docker/oci registry client and image building helpers for protocol version 2",
   "main": "build/src/index.js",
   "keywords": [],
   "scripts": {

@@ -55,8 +55,7 @@ npm install container-image-builder
 
 ## API
 
-- `import {Image} from 'container-image-builder'`
-- `import {GcrClient} from 'container-image-builder/registry'`
+- `require('container-image-builder').Image` or `import {Image} from 'container-image-builder'`
 
 ### Image builder API
 
@@ -75,6 +74,7 @@ npm install container-image-builder
 as you get more creative you'll find you have to combine work done in the image builder with lower level api calls.
 like adding a new blob directly to the target registry before you call addLayer.
 
+todo
 
 ## Common actions
 
@@ -82,7 +82,7 @@ like adding a new blob directly to the target registry before you call addLayer.
 
 ### add a layer to an image
 
-git### copy an image to another docker registry
+### copy an image to another docker registry
 
 ## notes
 
