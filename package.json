@@ -1,7 +1,7 @@
 {
-  "name": "container-registry-client",
+  "name": "container-image-builder",
   "version": "1.0.0",
-  "description": "container registry client. without docker docker/oci registry client and image building helpers with support for protocol version 2",
+  "description": "container registry client. without docker, docker/oci registry client and image building helpers for protocol version 2",
   "main": "build/src/index.js",
   "keywords": [],
   "scripts": {
@@ -14,8 +14,9 @@
     "pretest": "npm run compile",
     "posttest": "npm run check"
   },
-  "author": "",
+  "author": "Ryan Day <ryaneday@google.com>",
   "license": "Apache 2.0",
+  "repository":"google/nodejs-container-image-builder",
   "devDependencies": {
     "@types/micromatch": "^3.1.0",
     "@types/mocha": "^5.2.5",
