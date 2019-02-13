@@ -1,0 +1,39 @@
+{
+  "name": "container-registry-client",
+  "version": "1.0.0",
+  "description": "container registry client. without docker docker/oci registry client and image building helpers with support for protocol version 2",
+  "main": "build/src/index.js",
+  "keywords": [],
+  "scripts": {
+    "test": "nyc mocha -t 30000 --require source-map-support/register build/test/*.js",
+    "check": "gts check",
+    "clean": "gts clean",
+    "compile": "tsc -p .",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run check"
+  },
+  "author": "",
+  "license": "Apache 2.0",
+  "devDependencies": {
+    "@types/micromatch": "^3.1.0",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.18",
+    "@types/p-retry": "^2.0.0",
+    "@types/request": "^2.48.1",
+    "gts": "^0.9.0",
+    "mocha": "^5.2.0",
+    "nyc": "^13.1.0",
+    "source-map-support": "^0.5.10",
+    "typescript": "~3.1.0"
+  },
+  "dependencies": {
+    "google-auth-library": "^3.0.1",
+    "micromatch": "^3.1.10",
+    "p-retry": "^3.0.1",
+    "request": "^2.88.0",
+    "tar": "^4.4.8",
+    "walkdir": "^0.3.2"
+  }
+}
