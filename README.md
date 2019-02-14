@@ -6,7 +6,7 @@ without any docker dependency this is a container registry client and image buil
 This library comes in 2 parts. 
 
 - an Image class. which takes care of authentication and creating new registry clients. 
-- registry clients. perform exactly the api calls defined in the (oci spec.)[https://github.com/opencontainers/distribution-spec/blob/master/spec.md]
+- registry clients. perform exactly the api calls defined in the [oci spec.](https://github.com/opencontainers/distribution-spec/blob/master/spec.md)
 
 you can do most things with the Image class. It takes care of tedious tasks like copying layers missing from one registry into another so you can save your new image.
 
