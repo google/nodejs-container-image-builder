@@ -28,7 +28,7 @@ import {DockerAuthResult} from './credentials-helper';
 // https://docs.docker.com/registry/spec/api/
 // https://github.com/opencontainers/distribution-spec/blob/master/spec.md
 
-export class GcrClient {
+export class RegistryClient {
   _auth: DockerAuthResult;
   _registry: string;
   _repository: string;

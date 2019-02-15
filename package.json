@@ -16,7 +16,7 @@
   },
   "author": "Ryan Day <ryaneday@google.com>",
   "license": "Apache 2.0",
-  "repository":"google/nodejs-container-image-builder",
+  "repository": "google/nodejs-container-image-builder",
   "devDependencies": {
     "@types/micromatch": "^3.1.0",
     "@types/mocha": "^5.2.5",

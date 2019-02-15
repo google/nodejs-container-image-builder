@@ -1,5 +1,5 @@
 // @ts-check
-let Image = require('./build/src').Image
+let Image = require('../build/src').Image
 
 let from = process.argv[2]
 

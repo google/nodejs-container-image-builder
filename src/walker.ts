@@ -23,7 +23,9 @@ export type DirMap = {
 export type Options =
     walkdir.WalkOptions&{ignores?: string[], ignoreFiles?: string[]};
 
-export const walk = async (dir: string, options?: Options) => {
+export const walk = async (
+    dir: string, options?: Options,
+    onStat?: (path: string, stat: fs.Stats) => void) => {
   const cwd = process.cwd();
   const entryDir = path.resolve(cwd, dir);
   options = options || {};
@@ -108,7 +110,7 @@ export const walk = async (dir: string, options?: Options) => {
     };
   }
   options.find_links = false;
-  return walkdir.async(entryDir, options);
+  return walkdir.async(entryDir, options, onStat);
 };
 
 

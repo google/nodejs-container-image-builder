@@ -24,9 +24,12 @@ import {handler as gcrAuth} from './auth/gcr';
 import {DockerCredenitalHelpers} from './credentials-helper';
 import {ImageLocation, parse as parseSpecifier} from './image-specifier';
 import {pending, PendingTracker} from './pending';
-import {GcrClient, ImageConfig, ManifestV2} from './registry';
+import {ImageConfig, ManifestV2, RegistryClient} from './registry';
 
 const tar = require('tar');
+
+// expose plain registry client.
+export {RegistryClient} from './registry';
 
 export type ImageOptions = {
   auth?: AuthConfig,
@@ -45,7 +48,7 @@ export class Image {
   // the manifest and config for the source image
   private imageData: Promise<ImageData>;
   private originalManifest?: ManifestV2;
-  private clients: {[k: string]: GcrClient|Promise<GcrClient>} = {};
+  private clients: {[k: string]: RegistryClient|Promise<RegistryClient>} = {};
 
   private pending: PendingTracker;
 
@@ -207,7 +210,7 @@ export class Image {
     key += ',' + scope;
     const promiseOfClient =
         auth(image, scope, this.options.auth || {}).then((registryAuth) => {
-          const registryClient = new GcrClient(
+          const registryClient = new RegistryClient(
               image!.registry, this.nameSpacedImageName(image), registryAuth);
           return registryClient;
         });
