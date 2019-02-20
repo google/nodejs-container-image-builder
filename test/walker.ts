@@ -30,4 +30,29 @@ describe('ignore file walker', () => {
         result.indexOf('/taco.yaml') === -1,
         'should have honored ignore file and removed taco.yaml');
   });
+
+
+  it('ignores', async () => {
+    let result =
+        await walker.walk(
+            fixturePath,
+            {return_object: false, find_links: false, ignores: ['**/test']}) as
+        string[];
+    result = result.map((path) => path.replace(fixturePath, ''));
+    /*
+    [ '/.ignore',
+    '/index.js',
+    '/test',
+    '/lib',
+    '/test/taco.yaml',
+    '/test/test.js',
+    '/lib/a-file.js' ]
+    */
+
+    console.log(result);
+
+    assert.ok(
+        result.indexOf('/test/test.js') === -1,
+        'should have honored ignore string and removed test files');
+  });
 });

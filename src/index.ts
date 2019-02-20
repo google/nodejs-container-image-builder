@@ -15,14 +15,13 @@
 import * as crypto from 'crypto';
 import * as retry from 'p-retry';
 import * as path from 'path';
-import {Readable, Stream} from 'stream';
-import {resolve} from 'url';
 import * as zlib from 'zlib';
 
 import {handler as dockerAuth} from './auth/dockerio';
 import {handler as gcrAuth} from './auth/gcr';
 import {DockerCredenitalHelpers} from './credentials-helper';
 import {ImageLocation, parse as parseSpecifier} from './image-specifier';
+import * as packer from './packer';
 import {pending, PendingTracker} from './pending';
 import {ImageConfig, ManifestV2, RegistryClient} from './registry';
 
@@ -39,6 +38,7 @@ export type ImageData = {
   manifest: ManifestV2,
   config: ImageConfig
 };
+
 
 export class Image {
   private options: ImageOptions;
@@ -126,18 +126,33 @@ export class Image {
   }
   // "./myfiles", "/workspace"
   // "localDirectory", "imageDirectory"
-  addFiles(dir: string, targetDir: string): Promise<{
+  addFiles(
+      dir: string|{[dir: string]: string},
+      targetDir?: string|packer.PackOptions,
+      options?: packer.PackOptions): Promise<{
     mediaType: string,
     digest: string,
     size: number,
     uncompressedDigest: string
   }> {
-    dir = path.resolve(dir);
+    // dir,target,options
+    // dir,options
+    // {dir:target,....},options
+    if (typeof targetDir === 'string') {
+      if (typeof dir !== 'string') {
+        // addFiles({"apples":"oranges"},"pears")
+        throw new Error(
+            'specifying a target directory name when the dir is an object of name:target doesn\'t make sense. try addFiles({dir:target})');
+      }
+      dir = {[dir]: targetDir};
+    } else if (targetDir) {
+      // options!
+      options = targetDir;
+    }
+
     // have to wrap in promise because the tar stream can emit error out of band
     const p = new Promise(async (resolve, reject) => {
-      const tarStream = tar.c(
-          {cwd: path.resolve(dir), gzip: false, prefix: targetDir || ''},
-          ['./']);
+      const tarStream = packer.pack(dir, options);
 
       tarStream.on('error', (e: Error) => reject(e));
 
@@ -191,14 +206,21 @@ export class Image {
     return {manifest, config};
   }
 
-  client(image?: ImageLocation, write?: boolean) {
+  client(_image?: ImageLocation|string, write?: boolean) {
+    let image:ImageLocation;
+    if(typeof _image === 'string'){
+      image = parseSpecifier(_image)
+    } else {
+      // typescript!!!
+      image = _image as ImageLocation
+    }
+
     image = (image ? image : this.image);
     const scope = write ? 'push,pull' : 'pull';
     let key = [image.registry, image.namespace, image.image].join(',');
 
     const writeKey = key + ',push,pull';
     const readKey = key + ',pull';
-
 
     // default to most permissive cached client even if it doesn't match scope.
     if (this.clients[writeKey]) {
@@ -366,9 +388,14 @@ export class Image {
 
 
 export const auth =
-    async (image: ImageLocation, scope: string, options?: AuthConfig) => {
+    async (image: ImageLocation|string, scope: string, options?: AuthConfig) => {
   // todo: distinguish better between when we should try creds helpers vs only
   // built in.
+
+  if(typeof image == 'string'){
+    image = parseSpecifier(image)
+  }
+
   try {
     if (image.registry.indexOf('gcr.io') > -1) {
       return await gcrAuth(

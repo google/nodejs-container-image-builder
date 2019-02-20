@@ -6,6 +6,7 @@
   "keywords": [],
   "scripts": {
     "test": "nyc mocha -t 30000 --require source-map-support/register build/test/*.js",
+    "test-one": "nyc mocha -t 30000 --require source-map-support/register $1",
     "check": "gts check",
     "clean": "gts clean",
     "compile": "tsc -p .",
@@ -25,7 +26,7 @@
     "@types/request": "^2.48.1",
     "gts": "^0.9.0",
     "mocha": "^5.2.0",
-    "nyc": "^13.1.0",
+    "nyc": "^13.3.0",
     "source-map-support": "^0.5.10",
     "typescript": "~3.1.0"
   },

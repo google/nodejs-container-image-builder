@@ -45,6 +45,8 @@ export const walk = async (
       ignoreTree[entryDir] = ignores;
     }
 
+    console.log(ignoreTree);
+
     const applyRules = (dir: string, files: string[]) => {
       const currentDir = dir;
 
@@ -55,8 +57,6 @@ export const walk = async (
       let i: number;
 
       while (dir.lastIndexOf(path.sep) > -1) {
-        i = dir.lastIndexOf(path.sep);
-        dir = dir.substr(0, i);
         if (ignoreTree[dir]) {
           files = files.filter((file) => {
             const relativeToRuleSource =
@@ -69,6 +69,8 @@ export const walk = async (
             return !micromatch.any(relativeToRuleSource, ignoreTree[dir]);
           });
         }
+        i = dir.lastIndexOf(path.sep);
+        dir = dir.substr(0, i);
       }
 
       return files;
@@ -78,7 +80,7 @@ export const walk = async (
       if (!files.length) return [];
 
       const unread: Array<Promise<boolean>> = [];
-      if (ignoreFiles.length) {
+      if (ignoreFiles.length || ignores.length) {
         // check each file name to see if it's an ignore file.
         files.forEach((name) => {
           if (ignoreFilesMap[name]) {
