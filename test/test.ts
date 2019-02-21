@@ -76,7 +76,6 @@ describe('makes image object', () => {
 
     const result = image.addFiles(fixtureProject, '/code');
 
-
     const saveResult = await image.save(['joltik', 'pikachu'], {
       Cmd: ['node', 'index.js'],
       WorkingDir: '/code',
