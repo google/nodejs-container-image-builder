@@ -1,18 +1,18 @@
 container-image-builder
 =======================
 
-without any docker dependency this is a container registry client and image builder with support for protocol version 2
+A container registry client and image builder with no dependency on docker. This supports protocol version 2.
 
-This library comes in  a few parts. 
+This library has a few parts:
 
-- an Image class. which takes care of authentication, creating new registry clients, and packaging up local files. 
-- registry clients. perform exactly the api calls defined in the [oci spec.](https://github.com/opencontainers/distribution-spec/blob/master/spec.md)
+- An `Image` class: takes care of authentication, creating new registry clients, and packaging up local files. 
+- Registry clients: perform exactly the api calls defined in the [oci spec.](https://github.com/opencontainers/distribution-spec/blob/master/spec.md)
 
-you can do most things with the Image class. It takes care of tedious tasks like copying layers missing from one registry into another so you can save your new image.
+You can do most things with the `Image` class. It takes care of tedious tasks like copying layers missing from one registry into another so you can save your new image.
 
-## example
+## Example
 
-create a new image based off of the official node image with your files in it.
+Create a new image based off of the official node image with your files in it.
 
 ```js
 import {Image} from 'container-image-builder'
@@ -40,41 +40,41 @@ console.log(result)
 })();
 ```
 
-run the image
+You can run the image using docker, or deploy it to a docker host:
 
 ```sh
 docker run gcr.io/my-project/my-image:latest
 
 ```
 
-## install
+## Install
 
 ```
 npm install container-image-builder
 ```
 
-### terms
+### Glossary
 
-Learning about this distribution api I struggled mapping the names of some of the things to things i was familiar with.
+Learning about this distribution api I struggled mapping the names of some of the things to things I was familiar with.
 
-defined in the order that they compose into an "Image"
+Defined in the order that they compose into an "Image":
 
 - digest
-    - sha256 sum encoded as hex prefixed with "sha256:"
+    - sha256 sum encoded as hex prefixed with "sha256:".
 
 - blob
     - any file stored in a docker registry. 
-    - but they are mostly 2 kinds. "config" json or "layer" tarball
+    - B=but they are mostly 2 kinds. "config" json or "layer" tarball.
 
 - layer
     - is a tarball.
     - these tarballs are expanded at the root of the file system when run as part of an image as a container.
 
 - config
-    - a json document stored as a blob and referenced in the manifest
+    - a json document stored as a blob and referenced in the manifest.
     - this hold details about the environment and what commands should be run when your image run as a container.
-    - this holds an array of the shasums of every layer in a property called diff_ids. I call this uncompressedDigest throughout this client.
-    - i call it uncompressedDigest because its the shasum of the layer before it's gzipped.
+    - this holds an array of the shasums of every layer in a property called diff_ids. I call this `uncompressedDigest` throughout this client.
+    - I call it an uncompressedDigest because its the shasum of the layer before it's gzipped.
     - because we need the uncompressed digest for every layer quite a few things in this api are less straight forward that you might expect.
 
 - manifest
@@ -83,9 +83,9 @@ defined in the order that they compose into an "Image"
     - a manifest can have a tag which is a convenient way to name a specific version of the image.
 
 - Image
-    - is a combination of N layer blobs
-    - one image config blob
-    - and the manifest
+    - is a combination of N layer blobs.
+    - one image config blob.
+    - and the manifest.
 
 - Container
     - a process running an Image.
@@ -104,17 +104,17 @@ defined in the order that they compose into an "Image"
     - targetImage
         the name of the image you're going to be saving to. calls to image.save() will replace this image.
 
-- `image.addFiles({[localDirectory]:targetDirectory},options) :Promise<..>`
-    - tar local directories and place each at targetDirectory in a single layer
+- `image.addFiles({[localDirectory]:targetDirectory},options): Promise<..>`
+    - tar local directories and place each at targetDirectory in a single layer.
     - symlinks are replaced with their files/directories as they are written to the layer tarball by default.
     - options
         - `options.ignores`
-            - optional set of globs applied at the root of the local directory processed by [micromatch](https://www.npmjs.com/package/micromatch)
+            - optional set of globs applied at the root of the local directory processed by [micromatch](https://www.npmjs.com/package/micromatch).
         - `options.ignoreFiles`
-            - optional array of file names to be parsed for ignore globs. like `[".ignore"]`
+            - optional array of file names to be parsed for ignore globs. like `[".ignore"]`.
         - `options.tar` 
-            - control how the tar is packed with options from [node tar](https://www.npmjs.com/package/tar#class-tarpack)
-        - control directory traversal with options from [walkdir](https://www.npmjs.com/package/walkdir)
+            - control how the tar is packed with options from [node tar](https://www.npmjs.com/package/tar#class-tarpack).
+        - control directory traversal with options from [walkdir](https://www.npmjs.com/package/walkdir).
         
     - you can also call it with arguments like this but you should probably use the default.
         - `image.addFiles(localDirectory,targetDirectory,options) :Promise<..>`
@@ -122,7 +122,7 @@ defined in the order that they compose into an "Image"
 
 - `image.save(tags?: string[], options)`
     - save changes to the image. by default this saves the updated image as the `latest` tag
-    - `tags`, string[]
+    - `tags`, `string[]`
         - if you specify tags the manifest will be taged with each of them instead of the default.
     - `options`
         - Cmd. see image.Cmd below
@@ -135,16 +135,16 @@ defined in the order that they compose into an "Image"
             - primarily for debug/testing. this copies a blob into the target registry even though it already exists in the target
 
 - `image.WorkingDir = "/custom working dir"`
-    - string. 
+    - `string` 
     - If set this set the container's default working directory for commands.
 
 - `image.Cmd = ["ls","./"]` 
-    - string[]
+    - `string[]`
     - If set this will replace the base images default command with the one you specify.
 
 - `image.Env = ["HOME=/workspace"]`
-    - string[]
-    - append environment variables to the base image's env vars
+    - `string[]`
+    - append environment variables to the base image's env vars.
 
 - `image.getImageConfig() Promise<{ImageConfig}>`
     - returns reference to the part of the image config you're most likely to want to change.
@@ -160,7 +160,7 @@ defined in the order that they compose into an "Image"
     - args are optional. uses a cached client if one already exists.
     - return a promise to an authenticated registry client. 
         - auth is performed with options passed to new Image.
-    - imageSpecifier, string
+    - imageSpecifier, `string`
         - just like you would pass to docker or the image constructor.
     - default is the base image used in the constructor
 
@@ -170,7 +170,7 @@ defined in the order that they compose into an "Image"
         - set to false if you use nondistributable layers and cannot copy them to the target registry.
         - layers with a urls field will be copied into the target registry by default from the first url to return a 200 in the array.
     - ignoreExists, default false.
-        - primarily for debug/testing. this copies a blob into the target registry even though it already exists in the target
+        - primarily for debug/testing. this copies a blob into the target registry even though it already exists in the target.
     - manually trigger a sync from base image to target image registry.
     - this copies blobs from one registry to another. you may want to use this for performance to start copying base image layers while you do other work.
     - if the image has been synced it will not be synced in the call to `image.save()`
@@ -179,7 +179,7 @@ defined in the order that they compose into an "Image"
     - digest _required_
         - this is the id for the layer in the manifest
     - uncompressedDigest  _required_
-        - this is the id for the layer in the diff_ids array from the image config that maps to the layer
+        - this is the id for the layer in the diff_ids array from the image config that maps to the layer.
     - size _required_
         - the number of bytes of the compressed layer tarball.
     - urls, optional
@@ -196,17 +196,17 @@ defined in the order that they compose into an "Image"
 
 `const {auth} = require('container-image-builder')`
 
-authenticate to docker registries. This library has built in support for gcr.io and read only access to docker hub.
+Authenticate to docker registries. This library has built in support for [Google Container Registery](https://cloud.google.com/container-registry/) (`gcr.io`) and read only access to docker hub.
 for all other cases it'll fall back to using docker credential helpers already installed on your system.
 
 - `auth(imageSpecifier,scope,options) Promise<{Secret?:string,Username?:string,token?:string}>`
     - imageSpecifier, string
-        - image location like you pass to docker
+        - image location like you pass to docker.
     - scope, string "push" or "push,pull"
-        - passed to the auth api if requesting docker hub or gcr.io
+        - passed to the auth api if requesting docker hub or `gcr.io`.
     - options
         - options['gcr.io'] = {...}
-            - these are auth options passed directly to [google-auth-library](https://www.npmjs.com/package/google-auth-library)
+            - these are auth options passed directly to [google-auth-library](https://www.npmjs.com/package/google-auth-library).
             - you can also set the environment variable `GOOGLE_APPLICATION_CREDENTIALS=path to key file.json` and it will work as expected like other google client libraries.
         - options['docker.io'] = {...}
             - accepts these options. all are strings.
@@ -217,7 +217,7 @@ for all other cases it'll fall back to using docker credential helpers already i
 
 ### registry client API
 
-as you get more creative you'll find you have to combine work done in the image builder with lower level api calls.
+As you get more creative you'll find you have to combine work done in the image builder with lower level api calls.
 like adding a new blob directly to the target registry before you call addLayer.
 
 
@@ -272,11 +272,11 @@ like adding a new blob directly to the target registry before you call addLayer.
 - `client.upload(blob, contentLength, digest) Promise<{contentLength: number, digest: string}> `
     - note: upload a blob to the registry. you do not need to know the content length and digest before hand. if they're not provided they'll be calculated on the fly and a 2 step upload will be performed. It's more efficient if you know the contentLength and digest beforehand, but if you're streaming it can be more efficient to calculate on the fly.
     - blob, Readable|Buffer _required_
-        - a readable stream or buffer
+        - a readable stream or buffer.
     - contentLength, number optional
-        - the size in bytes of the blob
+        - the size in bytes of the blob.
     - digest, string optional
-        - sha256sum of the blob
+        - sha256sum of the blob.
 
 - `client.mount(digest: string, fromRepository: string)`
     - note: likely incomplete. this is much faster than alternatives if it works =)
@@ -296,7 +296,7 @@ TODO. recipes for common workflows here.
 
 ### copy an image to another docker registry
 
-## notes
+## Notes
 
 This is not an official google product.
 
