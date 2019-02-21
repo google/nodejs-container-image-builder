@@ -26,7 +26,20 @@ export const handler =
           // https://github.com/googleapis/google-auth-library-nodejs/blob/master/src/auth/googleauth.ts#L58
 
           // expects GOOGLE_APPLICATION_CREDENTIALS env or options
-          const client = await auth.getClient(options);
+          const resolvedOptions: GoogleAuthOptions = options || {};
+          if (!('scopes' in resolvedOptions)) {
+            // Depending on `scope` that describes push and/or pull
+            // capabilities, the Google services scope need to be specified to
+            // authenticate for reading or reading and writing to the Google
+            // Container Registry.
+            //
+            // Note: `scope` is either `pull` or `pull,push` and specifies
+            // reading or reading and writing to a registry respectively.
+            resolvedOptions.scopes = scope.indexOf('push') > -1 ?
+                'https://www.googleapis.com/auth/devstorage.read_write' :
+                'https://www.googleapis.com/auth/devstorage.read_only';
+          }
+          const client = await auth.getClient(resolvedOptions);
           const token = (await client.getAccessToken()).token || undefined;
 
           return {Username: '_token', Secret: token, token};
