@@ -266,7 +266,7 @@ export class Image {
       [].push.apply(imageData.config.config.Env, options.Env || this.Env || []);
     }
 
-    if (options.WorkingDir) {
+    if (options.WorkingDir || this.WorkingDir) {
       imageData.config.config.WorkingDir =
           options.WorkingDir || this.WorkingDir!;
     }
