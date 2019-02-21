@@ -14,14 +14,14 @@
 import * as assert from 'assert';
 import * as path from 'path';
 
-import {DockerCredenitalHelpers} from '../src/credentials-helper';
+import {DockerCredentialHelpers} from '../src/credentials-helper';
 
 describe('can get token from credential helper.', () => {
   it('can exec cred helper', async () => {
     const fixtureDir =
         path.resolve(path.join(__dirname, '..', '..', 'fixtures'));
     const helper =
-        new DockerCredenitalHelpers(path.join(fixtureDir, 'docker.json'));
+        new DockerCredentialHelpers(path.join(fixtureDir, 'docker.json'));
 
     process.env.PATH += ':' + fixtureDir;
 

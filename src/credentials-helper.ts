@@ -21,7 +21,7 @@ import * as url from 'url';
 // exists in the user home dir in windows.
 const defaultPath = path.join(process.env.HOME || '', '.docker', 'config.json');
 
-export class DockerCredenitalHelpers {
+export class DockerCredentialHelpers {
   private dockerConfig: DockerCredsConfig = {};
 
   constructor(customPathOrConfig?: string|DockerCredsConfig) {
