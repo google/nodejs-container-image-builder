@@ -13,12 +13,12 @@
 // limitations under the License.
 //
 import * as crypto from 'crypto';
+// cant use teeny-request because typings on return value.
+import * as request from 'request';
 import {Response} from 'request';
 import {Readable} from 'stream';
 import * as urlModule from 'url';
 
-// cant use teeny-request because typings on return value.
-import * as request from 'request';
 import {DockerAuthResult} from './credentials-helper';
 
 // https://docs.docker.com/registry/spec/api/

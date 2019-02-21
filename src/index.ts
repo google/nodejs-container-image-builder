@@ -207,12 +207,12 @@ export class Image {
   }
 
   client(_image?: ImageLocation|string, write?: boolean) {
-    let image:ImageLocation;
-    if(typeof _image === 'string'){
-      image = parseSpecifier(_image)
+    let image: ImageLocation;
+    if (typeof _image === 'string') {
+      image = parseSpecifier(_image);
     } else {
       // typescript!!!
-      image = _image as ImageLocation
+      image = _image as ImageLocation;
     }
 
     image = (image ? image : this.image);
@@ -387,13 +387,13 @@ export class Image {
 }
 
 
-export const auth =
-    async (image: ImageLocation|string, scope: string, options?: AuthConfig) => {
+export const auth = async (
+    image: ImageLocation|string, scope: string, options?: AuthConfig) => {
   // todo: distinguish better between when we should try creds helpers vs only
   // built in.
 
-  if(typeof image == 'string'){
-    image = parseSpecifier(image)
+  if (typeof image === 'string') {
+    image = parseSpecifier(image);
   }
 
   try {
