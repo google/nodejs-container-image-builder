@@ -23,7 +23,9 @@ export type DirMap = {
 export type Options =
     walkdir.WalkOptions&{ignores?: string[], ignoreFiles?: string[]};
 
-export const walk = async (dir: string, options?: Options) => {
+export const walk = async (
+    dir: string, options?: Options,
+    onStat?: (path: string, stat: fs.Stats) => void) => {
   const cwd = process.cwd();
   const entryDir = path.resolve(cwd, dir);
   options = options || {};
@@ -43,6 +45,8 @@ export const walk = async (dir: string, options?: Options) => {
       ignoreTree[entryDir] = ignores;
     }
 
+    console.log(ignoreTree);
+
     const applyRules = (dir: string, files: string[]) => {
       const currentDir = dir;
 
@@ -53,8 +57,6 @@ export const walk = async (dir: string, options?: Options) => {
       let i: number;
 
       while (dir.lastIndexOf(path.sep) > -1) {
-        i = dir.lastIndexOf(path.sep);
-        dir = dir.substr(0, i);
         if (ignoreTree[dir]) {
           files = files.filter((file) => {
             const relativeToRuleSource =
@@ -67,6 +69,8 @@ export const walk = async (dir: string, options?: Options) => {
             return !micromatch.any(relativeToRuleSource, ignoreTree[dir]);
           });
         }
+        i = dir.lastIndexOf(path.sep);
+        dir = dir.substr(0, i);
       }
 
       return files;
@@ -76,7 +80,7 @@ export const walk = async (dir: string, options?: Options) => {
       if (!files.length) return [];
 
       const unread: Array<Promise<boolean>> = [];
-      if (ignoreFiles.length) {
+      if (ignoreFiles.length || ignores.length) {
         // check each file name to see if it's an ignore file.
         files.forEach((name) => {
           if (ignoreFilesMap[name]) {
@@ -108,7 +112,7 @@ export const walk = async (dir: string, options?: Options) => {
     };
   }
   options.find_links = false;
-  return walkdir.async(entryDir, options);
+  return walkdir.async(entryDir, options, onStat);
 };
 
 

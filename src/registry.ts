@@ -13,22 +13,18 @@
 // limitations under the License.
 //
 import * as crypto from 'crypto';
-import * as googleAuthLib from 'google-auth-library';
 import {Response} from 'request';
 import {Readable} from 'stream';
 import * as urlModule from 'url';
 
-const gAuth = googleAuthLib.auth;
-
-// cant use teeny request because typings on return value.
+// cant use teeny-request because typings on return value.
 import * as request from 'request';
 import {DockerAuthResult} from './credentials-helper';
 
-// const request = require('hyperquest');
 // https://docs.docker.com/registry/spec/api/
 // https://github.com/opencontainers/distribution-spec/blob/master/spec.md
 
-export class GcrClient {
+export class RegistryClient {
   _auth: DockerAuthResult;
   _registry: string;
   _repository: string;
