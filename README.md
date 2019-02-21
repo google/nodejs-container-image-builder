@@ -196,7 +196,7 @@ Defined in the order that they compose into an "Image":
 
 `const {auth} = require('container-image-builder')`
 
-Authenticate to docker registries. This library has built in support for [Google Container Registery](https://cloud.google.com/container-registry/) (`gcr.io`) and read only access to docker hub.
+Authenticate to docker registries. This library has built in support for [Google Container Registery](https://cloud.google.com/container-registry/) (`gcr.io`) and [docker hub](https://hub.docker.com/).
 for all other cases it'll fall back to using docker credential helpers already installed on your system.
 
 - `auth(imageSpecifier,scope,options) Promise<{Secret?:string,Username?:string,token?:string}>`
