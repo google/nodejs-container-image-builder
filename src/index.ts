@@ -24,6 +24,7 @@ import {ImageLocation, parse as parseSpecifier} from './image-specifier';
 import * as packer from './packer';
 import {pending, PendingTracker} from './pending';
 import {ImageConfig, ManifestV2, RegistryClient} from './registry';
+import { GoogleAuthOptions } from 'google-auth-library';
 
 const tar = require('tar');
 
@@ -67,8 +68,14 @@ export class Image {
   // manifest
 
   constructor(
-      imageSpecifier: string, targetImage?: string, options?: ImageOptions) {
+      imageSpecifier: string, targetImage?: string|ImageOptions, options?: ImageOptions) {
     this.options = options || {};
+
+    if(typeof targetImage !== 'string'){
+      this.options = this.options || targetImage
+      targetImage = undefined;
+    }
+
     this.image = parseSpecifier(imageSpecifier);
     this.targetImage = parseSpecifier(targetImage || imageSpecifier);
 
@@ -399,7 +406,7 @@ export const auth = async (
   try {
     if (image.registry.indexOf('gcr.io') > -1) {
       return await gcrAuth(
-          image, scope, options ? options['gcr.io'] : undefined);
+          image, scope, options ? options['gcr.io']||{} : {});
     } else if (image.registry.indexOf('docker.io') > -1) {
       return await dockerAuth(
           image, scope, options ? options['docker.io'] : undefined);
@@ -418,6 +425,9 @@ export const auth = async (
 
 
 export interface AuthConfig {
+  'gcr.io'?:GoogleAuthOptions;
+  // tslint:disable-next-line:no-any
+  'docker.io'?:any;
   // tslint:disable-next-line:no-any
   [k: string]: any;
 }
