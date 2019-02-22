@@ -166,7 +166,7 @@ export class Image {
 
       tarStream.pipe(gzip);
 
-      const client = await this.client(this.targetImage);
+      const client = await this.client(this.targetImage, true);
       const result = await client.upload(gzip);
 
       const uncompressedDigest = 'sha256:' + uncompressedHash.digest('hex');
@@ -311,7 +311,7 @@ export class Image {
           'get image data failed to populate originalManifest somehow.');
     }
     const client = await this.client(this.image);
-    const targetClient = await this.client(this.targetImage);
+    const targetClient = await this.client(this.targetImage, true);
     // check that every layer in source image is present in target registry
     const copies: Array<Promise<{}>> = [];
     manifest.layers.forEach((layer) => {
