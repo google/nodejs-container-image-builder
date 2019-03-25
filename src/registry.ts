@@ -467,7 +467,7 @@ export interface ImageConfig {
     // tslint:disable-next-line:no-any
     Volumes: any,
     WorkingDir: string,
-    Entrypoint: null|string,
+    Entrypoint: null|string[],
     // tslint:disable-next-line:no-any
     OnBuild: any,
     // tslint:disable-next-line:no-any

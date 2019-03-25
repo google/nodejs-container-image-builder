@@ -1,6 +1,6 @@
 {
   "name": "container-image-builder",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "container image builder. without docker, docker/oci registry client and image building helpers for protocol version 2",
   "main": "build/src/index.js",
   "keywords": [],
@@ -13,7 +13,8 @@
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "posttest": "npm run check"
+    "posttest": "npm run check",
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md"
   },
   "author": "Ryan Day <ryaneday@google.com>",
   "license": "Apache 2.0",
@@ -24,6 +25,7 @@
     "@types/node": "^10.12.18",
     "@types/p-retry": "^2.0.0",
     "@types/request": "^2.48.1",
+    "conventional-changelog-cli": "^2.0.12",
     "gts": "^0.9.0",
     "mocha": "^5.2.0",
     "nyc": "^13.3.0",
