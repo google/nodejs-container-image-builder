@@ -292,16 +292,16 @@ export class RegistryClient {
                   }
                 },
                 (err: Error, res: Response) => {
-                  uuid = res.headers['docker-upload-uuid'] ?
-                      res.headers['docker-upload-uuid'] :
-                      uuid;
-
                   if (err) return reject(err);
                   if (res.statusCode !== 204) {
                     return reject(new Error(
                         'unexpected status code ' + res.statusCode +
                         ' for patch upload'));
                   }
+
+                  uuid = res.headers['docker-upload-uuid'] ?
+                      res.headers['docker-upload-uuid'] :
+                      uuid;
 
                   const digest = 'sha256:' + hash.digest('hex');
 

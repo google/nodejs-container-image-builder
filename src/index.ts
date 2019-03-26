@@ -19,7 +19,7 @@ import * as zlib from 'zlib';
 
 import {handler as dockerAuth} from './auth/dockerio';
 import {handler as gcrAuth} from './auth/gcr';
-import {DockerCredenitalHelpers} from './credentials-helper';
+import {DockerCredentialHelpers} from './credentials-helper';
 import {ImageLocation, parse as parseSpecifier} from './image-specifier';
 import * as packer from './packer';
 import {pending, PendingTracker} from './pending';
@@ -417,7 +417,7 @@ export const auth = async (
     //    '\n falling back to cred helpers.');
   }
 
-  const credHelpers = new DockerCredenitalHelpers();
+  const credHelpers = new DockerCredentialHelpers();
   const res = await credHelpers.auth(image.registry);
 
   return res;

@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as assert from 'assert';
 import {handler} from '../src/auth/dockerio';
+import {parse} from '../src/image-specifier';
 
-describe(
-    'can authenticate to docker.io',
-    () => {
-
-    });
+describe('can authenticate to docker.io', () => {
+  it('can get read write token to dockerio', async () => {
+    const imageLocation = parse('node:lts');
+    const res = await handler(imageLocation, 'push,pull');
+    // console.log(res);
+    assert.ok(res.token, 'should have token returned from docker api');
+  });
+});
