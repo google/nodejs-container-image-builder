@@ -76,7 +76,12 @@ export const walk = async (
       return files;
     };
 
+    //TODO: call user provided filter function first if set.
+    //let origFilter:(dir:string,files:string[])=>string[]|Promise<string[]>;
+    //if(options.filter) origFilter = options.filter;
+
     options.filter = (dir, files) => {
+      //if(origFilter) files = await origFilter(dir,files);
       if (!files.length) return [];
 
       const unread: Array<Promise<boolean>> = [];
