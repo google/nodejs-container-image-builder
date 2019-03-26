@@ -13,6 +13,7 @@
 // limitations under the License.
 //
 import * as crypto from 'crypto';
+import {GoogleAuthOptions} from 'google-auth-library';
 import * as retry from 'p-retry';
 import * as path from 'path';
 import * as zlib from 'zlib';
@@ -24,7 +25,6 @@ import {ImageLocation, parse as parseSpecifier} from './image-specifier';
 import * as packer from './packer';
 import {pending, PendingTracker} from './pending';
 import {ImageConfig, ManifestV2, RegistryClient} from './registry';
-import { GoogleAuthOptions } from 'google-auth-library';
 
 const tar = require('tar');
 
@@ -68,11 +68,12 @@ export class Image {
   // manifest
 
   constructor(
-      imageSpecifier: string, targetImage?: string|ImageOptions, options?: ImageOptions) {
+      imageSpecifier: string, targetImage?: string|ImageOptions,
+      options?: ImageOptions) {
     this.options = options || {};
 
-    if(typeof targetImage !== 'string'){
-      this.options = this.options || targetImage
+    if (typeof targetImage !== 'string') {
+      this.options = this.options || targetImage;
       targetImage = undefined;
     }
 
@@ -151,7 +152,7 @@ export class Image {
         throw new Error(
             'specifying a target directory name when the dir is an object of name:target doesn\'t make sense. try addFiles({dir:target})');
       }
-      dir = {[dir]: targetDir};
+      dir = {[targetDir]: dir};
     } else if (targetDir) {
       // options!
       options = targetDir;
@@ -406,7 +407,7 @@ export const auth = async (
   try {
     if (image.registry.indexOf('gcr.io') > -1) {
       return await gcrAuth(
-          image, scope, options ? options['gcr.io']||{} : {});
+          image, scope, options ? options['gcr.io'] || {} : {});
     } else if (image.registry.indexOf('docker.io') > -1) {
       return await dockerAuth(
           image, scope, options ? options['docker.io'] : undefined);
@@ -425,9 +426,9 @@ export const auth = async (
 
 
 export interface AuthConfig {
-  'gcr.io'?:GoogleAuthOptions;
+  'gcr.io'?: GoogleAuthOptions;
   // tslint:disable-next-line:no-any
-  'docker.io'?:any;
+  'docker.io'?: any;
   // tslint:disable-next-line:no-any
   [k: string]: any;
 }

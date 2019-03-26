@@ -10,7 +10,7 @@ describe('can pack', () => {
 
     const fixtureDir = path.join(__dirname, '..', '..', 'fixtures', 'project');
 
-    const tar = pack({[fixtureDir]: '/apples'});
+    const tar = pack({'/apples': fixtureDir});
 
     let paths: string[] = [];
 
@@ -40,7 +40,7 @@ describe('can pack', () => {
 
     const fixtureDir = path.join(__dirname, '..', '..', 'fixtures', 'project');
 
-    const tar = pack({[fixtureDir]: '/apples'}, {ignoreFiles: ['.ignore']});
+    const tar = pack({'/apples': fixtureDir}, {ignoreFiles: ['.ignore']});
 
     let paths: string[] = [];
 
@@ -70,7 +70,7 @@ describe('can pack', () => {
 
     const fixtureDir = path.join(__dirname, '..', '..', 'fixtures', 'project');
 
-    const tar = pack({[fixtureDir]: '/apples'}, {ignores: ['**/test']});
+    const tar = pack({'/apples': fixtureDir}, {ignores: ['**/test']});
 
     let paths: string[] = [];
 

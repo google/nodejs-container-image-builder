@@ -14,7 +14,7 @@
 
 import * as fs from 'fs';
 import * as _path from 'path';
-import {Readable} from 'stream';
+import {Readable, Writable} from 'stream';
 
 import {logger} from './emitter';
 import * as walker from './walker';
@@ -40,9 +40,10 @@ export type PackOptions = {
 }&walker.Options;
 
 export const pack =
-    (paths: {[fromPath: string]: string}|string, options?: PackOptions) => {
+    (paths: {[toPath: string]: string|CustomFile}|string,
+     options?: PackOptions) => {
       // thanks typescript.
-      let pathObj: {[fromPath: string]: string} = {};
+      let pathObj: {[toPath: string]: string|CustomFile} = {};
       if (typeof paths === 'string') {
         pathObj[paths] = paths;
       } else {
@@ -58,11 +59,14 @@ export const pack =
       let ends = 0;
       let starts = 0;
 
-      const queue: Array<{path: string, toPath: string, stat: fs.Stats}> = [];
+      const queue:
+          Array<{path: string, toPath: string, stat: fs.Stats | CustomFile}> =
+              [];
 
       // tar gzip:false etc.
       const pack = new Pack(
           Object.assign({}, options.tar || {}, {gzip: false, jobs: Infinity}));
+
       let working = false;
       const work = () => {
         if (working) return;
@@ -94,15 +98,24 @@ export const pack =
       let walkEnded = false;
 
       const walks: Array<Promise<{}>> = [];
-      Object.keys(pathObj).forEach((path) => {
-        const toPath = pathObj[path];
+      Object.keys(pathObj).forEach((toPath) => {
+        let path = pathObj[toPath];
+
+        if (path instanceof CustomFile) {
+          queue.push({
+            path: toPath,
+            toPath,
+            stat: path,
+          });
+          return work();
+        }
         path = _path.resolve(path);
         // ill need to use this to pause and resume. TODO
         // tslint:disable-next-line:only-arrow-functions
         walks.push(walker.walk(path, options, function(file, stat) {
           queue.push({
             path: file,
-            toPath: _path.join(toPath, file.replace(path, '')),
+            toPath: _path.join(toPath, file.replace(path as string, '')),
             stat,
           });
           work();
@@ -126,9 +139,9 @@ export const pack =
 function pathToReadEntry(opts: {
   path: string,
   toPath?: string,
-  linkpath?: string, stat: fs.Stats,
+  linkpath?: string, stat: fs.Stats|CustomFile,
   mtime?: number,
-  noMtime?: boolean, portable: boolean
+  noMtime?: boolean, portable: boolean,
 }) {
   const {path, linkpath, stat} = opts;
   let {toPath} = opts;
@@ -154,23 +167,33 @@ function pathToReadEntry(opts: {
   }
 
   const header = new Header({
-    path: toPath,
-    // if this is a link. the path the link points to.
-    linkpath,
-    mode: modeFix(stat.mode, stat.isDirectory()),
-    uid: portable ? null : stat.uid,
-    gid: portable ? null : stat.gid,
-    size: stat.isDirectory() ? 0 : stat.size,
-    mtime: noMtime ? null : mtime || stat.mtime,
-    type: statToType(stat),
-    uname: portable ? null : stat.uid === myuid ? myuser : '',
-    atime: portable ? null : stat.atime,
-    ctime: portable ? null : stat.ctime
-  });
+                   path: toPath,
+                   // if this is a link. the path the link points to.
+                   linkpath,
+                   mode: modeFix(stat.mode, stat.isDirectory()),
+                   uid: portable ? null : stat.uid || 0,
+                   gid: portable ? null : stat.gid || 0,
+                   size: stat.isDirectory() ? 0 : stat.size,
+                   mtime: noMtime ? null : mtime || stat.mtime,
+                   type: statToType(stat),
+                   uname: portable ? null : stat.uid === myuid ? myuser : '',
+                   atime: portable ? null : stat.atime,
+                   ctime: portable ? null : stat.ctime
+                 }) as Header;
 
-  const entry = new ReadEntry(header);
+  const entry = new ReadEntry(header) as ReadEntry;
 
-  if (stat.isFile()) {
+  if (stat instanceof CustomFile) {
+    if (stat.data) {
+      if ((stat.data as Readable).pipe) {
+        (stat.data as Readable).pipe(entry);
+      } else {
+        entry.write(stat.data);
+      }
+    } else {
+      entry.end();
+    }
+  } else if (stat.isFile()) {
     fs.createReadStream(path).pipe(entry);
   } else {
     entry.end();
@@ -179,11 +202,69 @@ function pathToReadEntry(opts: {
   return entry;
 }
 
+export class CustomFile {
+  mode: number;
+  linkPath?: string;
+  data?: Buffer|Readable;
 
-function statToType(stat: fs.Stats) {
+  uid = 0;
+  gid = 0;
+  ctime = new Date();
+  atime = new Date();
+  mtime = new Date();
+  size = 0;
+
+  constructor(opts: {
+    mode: number,  // 0
+    type: string,
+    linkPath?: string,
+    data?: Buffer|Readable,
+    size?: 0
+  }) {
+    // Take permissions from mode. Then set file type.
+    this.mode = (opts.mode & 0o7777) | entryTypeToMode(opts.type);
+    this.linkPath = opts.linkPath;
+    this.data = opts.data;
+    this.size = opts.size || 0;
+  }
+
+  isDirectory() {
+    return this.mode & fs.constants.S_IFDIR;
+  }
+
+  isSymbolicLink() {
+    return this.mode & fs.constants.S_IFLNK;
+  }
+
+  isFile() {
+    return this.mode & fs.constants.S_IFREG;
+  }
+}
+
+function statToType(stat: fs.Stats|CustomFile) {
   if (stat.isDirectory()) return 'Directory';
   if (stat.isSymbolicLink()) return 'SymbolicLink';
   if (stat.isFile()) return 'File';
   // return nothing if unsupported.
   return;
+}
+
+function entryTypeToMode(type: string) {
+  if (type === 'Directory') return fs.constants.S_IFDIR;
+  if (type === 'SymbolicLink') return fs.constants.S_IFLNK;
+  if (type === 'File') return fs.constants.S_IFREG;
+  // return nothing if unsupported.
+  throw new Error(
+      'unsupported entry type ' + type +
+      '. support types are "Directory", "SymbolicLink", "File"');
+}
+
+
+interface Header {
+  // tslint:disable-next-line:no-any
+  constructor(stat: {[k: string]: any}): Header;
+}
+
+interface ReadEntry extends Writable {
+  constructor(): ReadEntry;
 }

@@ -104,7 +104,12 @@ Defined in the order that they compose into an "Image":
     - targetImage
         the name of the image you're going to be saving to. calls to image.save() will replace this image.
 
-- `image.addFiles({[localDirectory]:targetDirectory},options): Promise<..>`
+- `image.addFiles({[targetDirectory]:localDirectory},options): Promise<..>`
+    - _BREAKING CHANGE_ between 1x AND 2x
+        - positions of `targetDirectory` and `localDirectory` were flipped in the object.
+        - when paths are specified as an object the keys are now `targetDirectory`. 
+        - this enables copying the same files into a container to different paths and CustomFiles
+
     - tar local directories and place each at targetDirectory in a single layer.
     - symlinks are replaced with their files/directories as they are written to the layer tarball by default.
     - options
