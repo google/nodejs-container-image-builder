@@ -181,13 +181,11 @@ function pathToReadEntry(opts: {
                    gid: portable ? null : stat.gid || 0,
                    size: stat.isDirectory() ? 0 : stat.size,
                    mtime: noMtime ? null : mtime || stat.mtime,
+                   type: statToType(stat)||'File',
                    uname: portable ? null : stat.uid === myuid ? myuser : '',
                    atime: portable ? null : stat.atime,
                    ctime: portable ? null : stat.ctime
                  }) as Header;
-
-
-  header.type = statToType(stat) || 'File';
 
   const entry = new ReadEntry(header) as ReadEntry;
 
@@ -196,14 +194,7 @@ function pathToReadEntry(opts: {
       if ((stat.data as Readable).pipe) {
         (stat.data as Readable).pipe(entry);
       } else {
-        // if we write the entry data directly via entry.write it causes the
-        // entry stream to never complete.
-        const ps = new PassThrough();
-        ps.pause();
-        ps.on('resume', () => {
-          ps.end(stat.data);
-        });
-        ps.pipe(entry);
+        entry.write(stat.data);
       }
     } else {
       entry.end();
@@ -221,9 +212,8 @@ export class CustomFile {
   mode: number;
   linkPath?: string;
   data?: Buffer|Readable;
-
-  uid = 1;
-  gid = 1;
+  uid = 0;
+  gid = 0;
   ctime = new Date();
   atime = new Date();
   mtime = new Date();
