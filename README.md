@@ -15,7 +15,6 @@ You can do most things with the `Image` class. It takes care of tedious tasks li
 Create a new image based off of the official node image with your files in it.
 
 ```js
-import {Image} from 'container-image-builder'
 
 ;(async()=>{
 const image = new Image('node:lts-slim','gcr.io/my-project/my-image')
@@ -105,10 +104,6 @@ Defined in the order that they compose into an "Image":
         the name of the image you're going to be saving to. calls to image.save() will replace this image.
 
 - `image.addFiles({[targetDirectory]:localDirectory},options): Promise<..>`
-    - _BREAKING CHANGE_ between 1x AND 2x
-        - positions of `targetDirectory` and `localDirectory` were flipped in the object.
-        - when paths are specified as an object the keys are now `targetDirectory`. 
-        - this enables copying the same files into a container to different paths and CustomFiles
 
     - tar local directories and place each at targetDirectory in a single layer.
     - symlinks are replaced with their files/directories as they are written to the layer tarball by default.
@@ -124,6 +119,11 @@ Defined in the order that they compose into an "Image":
     - you can also call it with arguments like this but you should probably use the default.
         - `image.addFiles(localDirectory,targetDirectory,options) :Promise<..>`
         - `image.addFiles(localDirectory,options) :Promise<..>`
+
+    - _BREAKING CHANGE_ between 1x AND 2x
+        - positions of `targetDirectory` and `localDirectory` were flipped in the object.
+        - when paths are specified as an object the keys are now `targetDirectory`. 
+        - this enables copying the same files into a container to different paths and CustomFiles
 
 - `image.save(tags?: string[], options)`
     - save changes to the image. by default this saves the updated image as the `latest` tag
@@ -216,7 +216,9 @@ Defined in the order that they compose into an "Image":
             - required if type is File
         - type
             - defaults to File
-            - supported are File,Directory
+            - supported are File, Directory, Symlink
+        - linkPath
+            - only used if Symlink
 
 - `customFile.uid`
     - default 0. set to number if you want to set uid
@@ -304,7 +306,7 @@ like adding a new blob directly to the target registry before you call addLayer.
         - the sha256 sum of the blob you want to download
     - stream, boolean
         - default false
-        - if you'ed like to download to a buffer or resolve to a readable stream.
+        - if you'd like to download to a buffer or resolve to a readable stream.
 
 - `client.upload(blob, contentLength, digest) Promise<{contentLength: number, digest: string}> `
     - note: upload a blob to the registry. you do not need to know the content length and digest before hand. if they're not provided they'll be calculated on the fly and a 2 step upload will be performed. It's more efficient if you know the contentLength and digest beforehand, but if you're streaming it can be more efficient to calculate on the fly.
