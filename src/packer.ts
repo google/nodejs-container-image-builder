@@ -14,7 +14,7 @@
 
 import * as fs from 'fs';
 import * as _path from 'path';
-import {Readable, Writable} from 'stream';
+import {PassThrough, Readable, Writable} from 'stream';
 
 import {logger} from './emitter';
 import * as walker from './walker';
@@ -52,6 +52,8 @@ export const pack =
 
       options = options || {};
 
+      const outer = new PassThrough();
+
       // flatten every link into the tree its in
       options.find_links = false;
       options.no_return = true;
@@ -82,7 +84,9 @@ export const pack =
         starts++;
         let entry;
         const {path, stat, toPath} = obj;
+
         entry = pathToReadEntry({path, stat, toPath, portable: false});
+
         entry.on('end', () => {
           ends++;
           working = false;
@@ -91,6 +95,7 @@ export const pack =
         entry.on('error', (err: Error) => {
           pack.emit('error', err);
         });
+
         pack.write(entry);
       };
 
@@ -110,7 +115,7 @@ export const pack =
           return work();
         }
         path = _path.resolve(path);
-        // ill need to use this to pause and resume. TODO
+
         // tslint:disable-next-line:only-arrow-functions
         walks.push(walker.walk(path, options, function(file, stat) {
           queue.push({
@@ -122,6 +127,7 @@ export const pack =
         }));
       });
 
+
       Promise.all(walks)
           .then(() => {
             walkEnded = true;
@@ -130,10 +136,10 @@ export const pack =
             }
           })
           .catch((e) => {
-            pack.emit('error', e);
+            outer.emit('error', e);
           });
 
-      return pack as Readable;
+      return pack.pipe(outer);
     };
 
 function pathToReadEntry(opts: {
@@ -158,7 +164,7 @@ function pathToReadEntry(opts: {
   // dont write an mtime
   const noMtime = opts.noMtime;
   // dont write anything other than size, linkpath, path and mode
-  const portable = opts.portable;
+  const portable = opts.portable || true;
 
   // add trailing / to directory paths
   toPath = toPath || path;
@@ -175,11 +181,13 @@ function pathToReadEntry(opts: {
                    gid: portable ? null : stat.gid || 0,
                    size: stat.isDirectory() ? 0 : stat.size,
                    mtime: noMtime ? null : mtime || stat.mtime,
-                   type: statToType(stat),
                    uname: portable ? null : stat.uid === myuid ? myuser : '',
                    atime: portable ? null : stat.atime,
                    ctime: portable ? null : stat.ctime
                  }) as Header;
+
+
+  header.type = statToType(stat) || 'File';
 
   const entry = new ReadEntry(header) as ReadEntry;
 
@@ -188,7 +196,14 @@ function pathToReadEntry(opts: {
       if ((stat.data as Readable).pipe) {
         (stat.data as Readable).pipe(entry);
       } else {
-        entry.write(stat.data);
+        // if we write the entry data directly via entry.write it causes the
+        // entry stream to never complete.
+        const ps = new PassThrough();
+        ps.pause();
+        ps.on('resume', () => {
+          ps.end(stat.data);
+        });
+        ps.pipe(entry);
       }
     } else {
       entry.end();
@@ -207,37 +222,44 @@ export class CustomFile {
   linkPath?: string;
   data?: Buffer|Readable;
 
-  uid = 0;
-  gid = 0;
+  uid = 1;
+  gid = 1;
   ctime = new Date();
   atime = new Date();
   mtime = new Date();
   size = 0;
 
   constructor(opts: {
-    mode: number,  // 0
-    type: string,
+    mode?: number,  // 0
+    type?: string,
     linkPath?: string,
     data?: Buffer|Readable,
-    size?: 0
+    size?: number
   }) {
+    const type = opts.type || 'File';
     // Take permissions from mode. Then set file type.
-    this.mode = (opts.mode & 0o7777) | entryTypeToMode(opts.type);
+    this.mode = ((opts.mode || 0) & 0o7777) | entryTypeToMode(type) | 0o644;
     this.linkPath = opts.linkPath;
     this.data = opts.data;
     this.size = opts.size || 0;
+    if (Buffer.isBuffer(opts.data)) {
+      this.size = opts.data.length;
+    } else if (!this.size && type === 'File') {
+      throw new Error(
+          'if data is not a buffer and this CustomFile is a "File" `opts.size` is required');
+    }
   }
 
   isDirectory() {
-    return this.mode & fs.constants.S_IFDIR;
+    return (this.mode & fs.constants.S_IFMT) === fs.constants.S_IFDIR;
   }
 
   isSymbolicLink() {
-    return this.mode & fs.constants.S_IFLNK;
+    return (this.mode & fs.constants.S_IFMT) === fs.constants.S_IFLNK;
   }
 
   isFile() {
-    return this.mode & fs.constants.S_IFREG;
+    return (this.mode & fs.constants.S_IFMT) === fs.constants.S_IFREG;
   }
 }
 
@@ -263,6 +285,7 @@ function entryTypeToMode(type: string) {
 interface Header {
   // tslint:disable-next-line:no-any
   constructor(stat: {[k: string]: any}): Header;
+  type: string;
 }
 
 interface ReadEntry extends Writable {

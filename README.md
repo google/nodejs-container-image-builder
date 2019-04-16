@@ -94,7 +94,7 @@ Defined in the order that they compose into an "Image":
 ## API
 
 - `const {Image} = require('container-image-builder')`
-- or `import {Image} from 'container-image-builder'` in typescript etc.
+- or `import {Image} from 'container-image-builder'` in typescript etc.    
 
 ### Image builder API
 
@@ -196,6 +196,38 @@ Defined in the order that they compose into an "Image":
 
     - remove the layer tagged in the manifest by digest. save it's offset in the array.
     - remove the uncompressedDigest from the image config that matches the offset above
+
+- `const {CustomFile} = require('container-image-builder')`
+    - you can pass CustomFile to image.addFiles as a localPath to write in memory data or a stream to the layer tarball.
+    - `image.addFiles({'/help.md':new CustomFile({data:Buffer.from('hello')})})`
+    - `image.addFiles({'/google.html':new CustomFile({data:request('https://google.com'),size:**you must have size beforehand for streams**})})`
+    - useful for creating whiteout files etc.
+
+- `customFile = new CustomFile(options)`
+    - options
+        - mode
+            - defaults to `0o644` owner read write, everyone read. 
+            - see [fs.chmod](https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_file_modes)
+            - permission bits are extracted from the mode provided via `& 0o7777` and type bits are set based on type.
+        - size
+            - required if stream. optional with buffer
+        - data
+            - a stream or buffer of data which will be the contents of the file.
+            - required if type is File
+        - type
+            - defaults to File
+            - supported are File,Directory
+
+- `customFile.uid`
+    - default 0. set to number if you want to set uid
+- `customFile.gid`
+    - default 0. set to number if you want to set gid
+- `customFile.ctime`
+    - default new Date(). set to Date if you want to set
+- `customFile.atime`
+    - default new Date(). set to Date if you want to set
+- `customFile.mtime`
+    - default new Date(). set to Date if you want to set
 
 ### docker registry auth
 

@@ -45,8 +45,6 @@ export const walk = async (
       ignoreTree[entryDir] = ignores;
     }
 
-    console.log(ignoreTree);
-
     const applyRules = (dir: string, files: string[]) => {
       const currentDir = dir;
 

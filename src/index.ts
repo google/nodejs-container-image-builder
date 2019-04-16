@@ -159,7 +159,7 @@ export class Image {
     }
 
     // have to wrap in promise because the tar stream can emit error out of band
-    const p = new Promise(async (resolve, reject) => {
+    let p = new Promise(async (resolve, reject) => {
       const tarStream = packer.pack(dir, options);
 
       tarStream.on('error', (e: Error) => reject(e));
@@ -183,7 +183,7 @@ export class Image {
           result.digest, uncompressedDigest, result.contentLength));
     });
 
-    this.pending.track(p);
+    p = this.pending.track(p);
 
     return p as Promise<{
              mediaType: string; digest: string; size: number;
@@ -254,13 +254,12 @@ export class Image {
     Cmd?: string[],
     WorkingDir?: string
   }) {
-    tags = tags || ['latest'];
-
-    options = options || {};
-
     const targetImage = this.targetImage;
     const client = await this.client(targetImage, true);
     const imageData = await this.getImageData();
+
+    tags = tags || [targetImage.tag || 'latest'];
+    options = options || {};
 
     await this.syncBaseImage(options);
 
@@ -424,6 +423,10 @@ export const auth = async (
   return res;
 };
 
+export const pack = packer.pack;
+
+// expose CustomFile to pass in image.addFiles
+export const CustomFile = packer.CustomFile;
 
 export interface AuthConfig {
   'gcr.io'?: GoogleAuthOptions;

@@ -6,13 +6,14 @@
   "keywords": [],
   "scripts": {
     "test": "nyc mocha -t 30000 --require source-map-support/register build/test/*.js",
-    "test-one": "nyc mocha -t 30000 --require source-map-support/register $1",
+    "test-one": "nyc mocha -t 30000 --require source-map-support/register --grep 'packs a custom file' $1",
     "check": "gts check",
     "clean": "gts clean",
     "compile": "tsc -p .",
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
+    "pretest-one": "npm run compile",
     "posttest": "npm run check",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md"
   },
