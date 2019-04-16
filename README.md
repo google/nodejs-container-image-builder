@@ -15,7 +15,6 @@ You can do most things with the `Image` class. It takes care of tedious tasks li
 Create a new image based off of the official node image with your files in it.
 
 ```js
-import {Image} from 'container-image-builder'
 
 ;(async()=>{
 const image = new Image('node:lts-slim','gcr.io/my-project/my-image')
@@ -94,7 +93,7 @@ Defined in the order that they compose into an "Image":
 ## API
 
 - `const {Image} = require('container-image-builder')`
-- or `import {Image} from 'container-image-builder'` in typescript etc.
+- or `import {Image} from 'container-image-builder'` in typescript etc.    
 
 ### Image builder API
 
@@ -104,7 +103,8 @@ Defined in the order that they compose into an "Image":
     - targetImage
         the name of the image you're going to be saving to. calls to image.save() will replace this image.
 
-- `image.addFiles({[localDirectory]:targetDirectory},options): Promise<..>`
+- `image.addFiles({[targetDirectory]:localDirectory},options): Promise<..>`
+
     - tar local directories and place each at targetDirectory in a single layer.
     - symlinks are replaced with their files/directories as they are written to the layer tarball by default.
     - options
@@ -119,6 +119,11 @@ Defined in the order that they compose into an "Image":
     - you can also call it with arguments like this but you should probably use the default.
         - `image.addFiles(localDirectory,targetDirectory,options) :Promise<..>`
         - `image.addFiles(localDirectory,options) :Promise<..>`
+
+    - _BREAKING CHANGE_ between 1x AND 2x
+        - positions of `targetDirectory` and `localDirectory` were flipped in the object.
+        - when paths are specified as an object the keys are now `targetDirectory`. 
+        - this enables copying the same files into a container to different paths and CustomFiles
 
 - `image.save(tags?: string[], options)`
     - save changes to the image. by default this saves the updated image as the `latest` tag
@@ -191,6 +196,40 @@ Defined in the order that they compose into an "Image":
 
     - remove the layer tagged in the manifest by digest. save it's offset in the array.
     - remove the uncompressedDigest from the image config that matches the offset above
+
+- `const {CustomFile} = require('container-image-builder')`
+    - you can pass CustomFile to image.addFiles as a localPath to write in memory data or a stream to the layer tarball.
+    - `image.addFiles({'/help.md':new CustomFile({data:Buffer.from('hello')})})`
+    - `image.addFiles({'/google.html':new CustomFile({data:request('https://google.com'),size:**you must have size beforehand for streams**})})`
+    - useful for creating whiteout files etc.
+
+- `customFile = new CustomFile(options)`
+    - options
+        - mode
+            - defaults to `0o644` owner read write, everyone read. 
+            - see [fs.chmod](https://nodejs.org/dist/latest-v10.x/docs/api/fs.html#fs_file_modes)
+            - permission bits are extracted from the mode provided via `& 0o7777` and type bits are set based on type.
+        - size
+            - required if stream. optional with buffer
+        - data
+            - a stream or buffer of data which will be the contents of the file.
+            - required if type is File
+        - type
+            - defaults to File
+            - supported are File, Directory, Symlink
+        - linkPath
+            - only used if Symlink
+
+- `customFile.uid`
+    - default 0. set to number if you want to set uid
+- `customFile.gid`
+    - default 0. set to number if you want to set gid
+- `customFile.ctime`
+    - default new Date(). set to Date if you want to set
+- `customFile.atime`
+    - default new Date(). set to Date if you want to set
+- `customFile.mtime`
+    - default new Date(). set to Date if you want to set
 
 ### docker registry auth
 
@@ -267,7 +306,7 @@ like adding a new blob directly to the target registry before you call addLayer.
         - the sha256 sum of the blob you want to download
     - stream, boolean
         - default false
-        - if you'ed like to download to a buffer or resolve to a readable stream.
+        - if you'd like to download to a buffer or resolve to a readable stream.
 
 - `client.upload(blob, contentLength, digest) Promise<{contentLength: number, digest: string}> `
     - note: upload a blob to the registry. you do not need to know the content length and digest before hand. if they're not provided they'll be calculated on the fly and a 2 step upload will be performed. It's more efficient if you know the contentLength and digest beforehand, but if you're streaming it can be more efficient to calculate on the fly.
