@@ -194,7 +194,14 @@ function pathToReadEntry(opts: {
       if ((stat.data as Readable).pipe) {
         (stat.data as Readable).pipe(entry);
       } else {
-        entry.write(stat.data);
+        // if we write the entry data directly via entry.write it causes the
+        // entry stream to never complete.
+        const ps = new PassThrough();
+        ps.pause();
+        ps.on('resume', () => {
+          ps.end(stat.data);
+        });
+        ps.pipe(entry);
       }
     } else {
       entry.end();
@@ -212,8 +219,8 @@ export class CustomFile {
   mode: number;
   linkPath?: string;
   data?: Buffer|Readable;
-  uid = 0;
-  gid = 0;
+  uid = 1;
+  gid = 1;
   ctime = new Date();
   atime = new Date();
   mtime = new Date();

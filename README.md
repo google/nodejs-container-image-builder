@@ -220,6 +220,7 @@ Defined in the order that they compose into an "Image":
         - linkPath
             - only used if Symlink
 
+
 - `customFile.uid`
     - default 0. set to number if you want to set uid
 - `customFile.gid`
