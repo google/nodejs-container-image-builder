@@ -46,6 +46,22 @@ docker run gcr.io/my-project/my-image:latest
 
 ```
 
+Docker hub and gcr.io have custom auth plugins.  If you already have a token or username and secret you can pass them directly when making an Image client.
+
+```js
+const image = new Image('node:lts-slim','myspecialregistry.io/my-project/my-image',{
+    'myspecialregistry.io':{
+        token:"xxxxxxxxxxx"
+    }
+})
+```
+`node:lts-slim` is a public image so no need to provide auth for docker.io
+
+Also if you have a docker credential helper installed on the system, and in your docker config that matches the registry we'll call it before giving up.
+
+see <a href="docker-registry-auth">auth information</a> for more.
+
+
 ## Install
 
 ```
@@ -97,11 +113,15 @@ Defined in the order that they compose into an "Image":
 
 ### Image builder API
 
-- `image = new Image(baseImage:string,targetImage:string)`
+- `image = new Image(baseImage:string,targetImage:string|ImageOptions,options:ImageOptions)`
     - baseImage
         the name of the base image. these are image specifiers just like you would pass to other container tools.
     - targetImage
         the name of the image you're going to be saving to. calls to image.save() will replace this image.
+    - options (ImageOptions)
+        - auth - {'container registry cname':{registry credentials}}
+            - see <a href="docker-registry-auth">Detailed auth information</a> for more about how to authenticate with any registry.
+
 
 - `image.addFiles({[targetDirectory]:localDirectory},options): Promise<..>`
 
@@ -253,6 +273,16 @@ for all other cases it'll fall back to using docker credential helpers already i
             - `options.Secret`
             - `options.Username`
             - `options.token`
+        - options[ any other registry ] = {Username:string,Secret:string} or {token:string}
+            - if username and secret is provided the client will attempt to use http basic auth
+            - if token is provided it will use Bearer header auth.
+
+#### credential helpers
+
+if docker is configured to look for credentials in credentials helpers authentication will be fetched from them automatically
+https://docs.docker.com/engine/reference/commandline/login/#credential-helpers
+
+this library does not attempt to read base64 or credentials from a secret service/keychain on the host.
 
 ### registry client API
 
@@ -324,6 +354,7 @@ like adding a new blob directly to the target registry before you call addLayer.
     - digest, string _required_
         - the sha256 sum of the target blob
         - the repository to mount from.
+
 
 ## Common actions
 

@@ -20,7 +20,7 @@ import * as zlib from 'zlib';
 
 import {handler as dockerAuth} from './auth/dockerio';
 import {handler as gcrAuth} from './auth/gcr';
-import {DockerCredentialHelpers} from './credentials-helper';
+import {DockerAuthResult, DockerCredentialHelpers} from './credentials-helper';
 import {ImageLocation, parse as parseSpecifier} from './image-specifier';
 import * as packer from './packer';
 import {pending, PendingTracker} from './pending';
@@ -33,8 +33,9 @@ export {RegistryClient} from './registry';
 
 export type ImageOptions = {
   auth?: AuthConfig,
-  sync?: false|undefined
+  // sync?: false|undefined
 };
+
 export type ImageData = {
   manifest: ManifestV2,
   config: ImageConfig
@@ -402,12 +403,14 @@ export class Image {
 
 
 export const auth = async (
-    image: ImageLocation|string, scope: string, options?: AuthConfig) => {
+    imageArg: ImageLocation|string, scope: string, options?: AuthConfig) => {
   // todo: distinguish better between when we should try creds helpers vs only
   // built in.
-
-  if (typeof image === 'string') {
-    image = parseSpecifier(image);
+  let image: ImageLocation;
+  if (typeof imageArg === 'string') {
+    image = parseSpecifier(imageArg);
+  } else {
+    image = imageArg;
   }
 
   try {
@@ -415,6 +418,9 @@ export const auth = async (
       return await gcrAuth(
           image, scope, options ? options['gcr.io'] || {} : {});
     } else if (image.registry.indexOf('docker.io') > -1) {
+      // dockerhub requires you log in every 5 minutes.
+      // we'll always try to get a new token for the user with the provided auth
+      // data
       return await dockerAuth(
           image, scope, options ? options['docker.io'] : undefined);
     }
@@ -422,6 +428,27 @@ export const auth = async (
     // console.error(
     //    'gcr or docker.io auth threw.\n' + e +
     //    '\n falling back to cred helpers.');
+  }
+
+
+  // if the user provided auth options
+  if (options) {
+    const checked = ['gcr.io', 'docker.io'];
+    let providedAuth: DockerAuthResult|undefined;
+    Object.keys(options).forEach((s) => {
+      if (!checked.includes(s)) {
+        if (image.registry.indexOf(s) > -1) {
+          // we have auth provided directly for this registry.
+          providedAuth = options[s];
+        }
+      }
+    });
+
+    // if we dont have an auth helper we assume the user has passed valid
+    // credentials.
+    if (providedAuth) {
+      return providedAuth;
+    }
   }
 
   const credHelpers = new DockerCredentialHelpers();
@@ -440,7 +467,7 @@ export interface AuthConfig {
   // tslint:disable-next-line:no-any
   'docker.io'?: any;
   // tslint:disable-next-line:no-any
-  [k: string]: any;
+  [k: string]: DockerAuthResult|any;
 }
 
 export interface SyncOptions {
