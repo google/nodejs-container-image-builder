@@ -149,7 +149,9 @@ function pathToReadEntry(opts: {
   mtime?: number,
   noMtime?: boolean, portable: boolean,
 }) {
-  const {path, linkpath, stat} = opts;
+  const {path, stat} = opts;
+  const linkpath = opts.linkpath;
+
   let {toPath} = opts;
   if (!stat) {
     throw new Error('stat missing for ' + opts);
@@ -175,19 +177,17 @@ function pathToReadEntry(opts: {
   const header = new Header({
                    path: toPath,
                    // if this is a link. the path the link points to.
-                   linkpath,
+                   linkpath: linkpath || (stat as CustomFile).linkPath,
                    mode: modeFix(stat.mode, stat.isDirectory()),
                    uid: portable ? null : stat.uid || 0,
                    gid: portable ? null : stat.gid || 0,
                    size: stat.isDirectory() ? 0 : stat.size,
                    mtime: noMtime ? null : mtime || stat.mtime,
+                   type: statToType(stat) || 'File',
                    uname: portable ? null : stat.uid === myuid ? myuser : '',
                    atime: portable ? null : stat.atime,
                    ctime: portable ? null : stat.ctime
                  }) as Header;
-
-
-  header.type = statToType(stat) || 'File';
 
   const entry = new ReadEntry(header) as ReadEntry;
 
@@ -221,7 +221,6 @@ export class CustomFile {
   mode: number;
   linkPath?: string;
   data?: Buffer|Readable;
-
   uid = 1;
   gid = 1;
   ctime = new Date();
@@ -244,7 +243,7 @@ export class CustomFile {
     this.size = opts.size || 0;
     if (Buffer.isBuffer(opts.data)) {
       this.size = opts.data.length;
-    } else if (!this.size && type === 'File') {
+    } else if (!this.size && this.size !== 0 && type === 'File') {
       throw new Error(
           'if data is not a buffer and this CustomFile is a "File" `opts.size` is required');
     }
@@ -286,6 +285,7 @@ interface Header {
   // tslint:disable-next-line:no-any
   constructor(stat: {[k: string]: any}): Header;
   type: string;
+  linkpath?: string;
 }
 
 interface ReadEntry extends Writable {

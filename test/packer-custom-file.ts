@@ -64,7 +64,66 @@ describe('packer customFiles', () => {
     });
   });
 
+  it('packs an empty custom file', (done) => {
+    const nodeTar = require('tar');
 
+
+    const tar = pack({'/a-file': new CustomFile({size: 0})});
+
+    let paths: string[] = [];
+    const data: {[k: string]: Buffer[]} = {};
+
+    const extract = tar.pipe(new nodeTar.Parse());
+
+    extract.on('entry', (e: Readable&{path: string}) => {
+      paths.push(e.path);
+      data[e.path] = [];
+      e.on('data', (buf) => {
+        data[e.path].push(buf);
+      });
+    });
+
+    extract.on('end', () => {
+      paths = paths.sort();
+
+      assert.deepStrictEqual(['a-file'], paths, 'found custom file');
+
+      assert.strictEqual(
+          Buffer.concat(data['a-file']) + '', '',
+          'should get no data for the file.');
+
+      done();
+    });
+  });
+
+  it('packs a custom link', (done) => {
+    const nodeTar = require('tar');
+
+    const tar = pack({
+      '/a-file': new CustomFile(
+          {type: 'SymbolicLink', linkPath: '/linktarget', size: 0})
+    });
+
+    let paths: string[] = [];
+    const links: string[] = [];
+    // const data: {[k: string]: Buffer[]} = {};
+    // const bufs: Buffer[] = [];
+
+    const extract = tar.pipe(new nodeTar.Parse());
+
+    extract.on('entry', (e: Readable&{path: string, linkpath: string}) => {
+      paths.push(e.path);
+      links.push(e.linkpath);
+      e.resume();
+    });
+
+    extract.on('end', () => {
+      paths = paths.sort();
+      assert.deepStrictEqual(['a-file'], paths, 'found custom link');
+      assert.deepStrictEqual(['/linktarget'], links, 'found custom link');
+      done();
+    });
+  });
 
   it('packs a custom file from stream', (done) => {
     const nodeTar = require('tar');

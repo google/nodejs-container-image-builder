@@ -49,7 +49,7 @@ export class Image {
   // the manifest and config for the source image
   private imageData: Promise<ImageData>;
   private originalManifest?: ManifestV2;
-  private clients: {[k: string]: RegistryClient|Promise<RegistryClient>} = {};
+  private clients: {[k: string]: Promise<RegistryClient>} = {};
 
   private pending: PendingTracker;
 
@@ -87,7 +87,14 @@ export class Image {
     const readOnly =
         this.authKey(this.image) !== this.authKey(this.targetImage);
 
-    this.client(this.image, !readOnly);
+    // optimistic client loading. if it error's the user will be able to get the
+    // error the next time they grab a client or try to save.
+    this.client(this.image, !readOnly)
+        .catch(
+            () => {
+                // we can ignore the unhandled rejection here because we cache
+                // this promise and return it when they try to get the client.
+            });
     this.imageData = this.getImageData();
   }
 
