@@ -59,7 +59,7 @@ const image = new Image('node:lts-slim','myspecialregistry.io/my-project/my-imag
 
 Also if you have a docker credential helper installed on the system, and in your docker config that matches the registry we'll call it before giving up.
 
-see <a href="docker-registry-auth">auth information</a> for more.
+see <a href="#docker-registry-auth">auth information</a> for more.
 
 
 ## Install
@@ -120,7 +120,7 @@ Defined in the order that they compose into an "Image":
         the name of the image you're going to be saving to. calls to image.save() will replace this image.
     - options (ImageOptions)
         - auth - {'container registry cname':{registry credentials}}
-            - see <a href="docker-registry-auth">Detailed auth information</a> for more about how to authenticate with any registry.
+            - see <a href="#docker-registry-auth">Detailed auth information</a> for more about how to authenticate with any registry.
 
 
 - `image.addFiles({[targetDirectory]:localDirectory},options): Promise<..>`
