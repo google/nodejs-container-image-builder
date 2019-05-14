@@ -15,7 +15,8 @@
     "pretest": "npm run compile",
     "pretest-one": "npm run compile",
     "posttest": "npm run check",
-    "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md"
+    "version": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && git add CHANGELOG.md",
+    "env": "env"
   },
   "author": "Ryan Day <ryaneday@google.com>",
   "license": "Apache 2.0",
@@ -39,6 +40,6 @@
     "p-retry": "^3.0.1",
     "request": "^2.88.0",
     "tar": "^4.4.8",
-    "walkdir": "^0.3.2"
+    "walkdir": "^0.4.0"
   }
 }
