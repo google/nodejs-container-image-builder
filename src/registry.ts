@@ -78,7 +78,9 @@ export class RegistryClient {
               } else {
                 reject(new Error(
                     'unexpected status code ' + res.statusCode +
-                    ' from docker registry. response ' + body));
+                    ' from docker registry (' + url +
+                    ' , and auth?: ' + (this.authHeader() ? true : false) +
+                    ')  response ' + body));
               }
             } catch (e) {
               reject(e);
