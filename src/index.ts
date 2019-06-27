@@ -15,7 +15,6 @@
 import * as crypto from 'crypto';
 import {GoogleAuthOptions} from 'google-auth-library';
 import * as retry from 'p-retry';
-import * as path from 'path';
 import * as zlib from 'zlib';
 
 import {handler as dockerAuth} from './auth/dockerio';
@@ -48,7 +47,7 @@ export class Image {
   // where to save the image and where to upload blobs
   private targetImage: ImageLocation;
   // the manifest and config for the source image
-  private imageData: Promise<ImageData>;
+  private imageData: ImageData|false;
   private originalManifest?: ManifestV2;
   private clients: {[k: string]: Promise<RegistryClient>} = {};
 
@@ -96,7 +95,8 @@ export class Image {
                 // we can ignore the unhandled rejection here because we cache
                 // this promise and return it when they try to get the client.
             });
-    this.imageData = this.getImageData();
+
+    this.imageData = false;
   }
 
   // returns the part of the config object you care about for things like
@@ -202,11 +202,11 @@ export class Image {
 
   async getImageData() {
     if (!this.imageData) {
-      this.imageData = this.loadImageData();
-      this.pending.track(this.imageData);
-      this.imageData.then((data) => {
-        this.originalManifest = JSON.parse(JSON.stringify(data.manifest));
-      });
+      const p = this.loadImageData();
+      this.imageData = await p;
+
+      this.originalManifest =
+          JSON.parse(JSON.stringify(this.imageData.manifest));
     }
     return this.imageData;
   }
@@ -278,7 +278,8 @@ export class Image {
     }
 
     if (options.Env || this.Env) {
-      [].push.apply(imageData.config.config.Env, options.Env || this.Env || []);
+      imageData.config.config.Env =
+          imageData.config.config.Env.concat(options.Env || this.Env || []);
     }
 
     if (options.WorkingDir || this.WorkingDir) {
