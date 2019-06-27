@@ -202,9 +202,7 @@ export class Image {
 
   async getImageData() {
     if (!this.imageData) {
-      const p = this.loadImageData();
-      this.imageData = await p;
-
+      this.imageData = await this.loadImageData();
       this.originalManifest =
           JSON.parse(JSON.stringify(this.imageData.manifest));
     }
