@@ -41,5 +41,8 @@
     "request": "^2.88.0",
     "tar": "^4.4.8",
     "walkdir": "^0.4.0"
+  },
+  "publishConfig": {
+    "registry":"https://wombat-dressing-room.appspot.com/container-image-builder/_ns"
   }
 }

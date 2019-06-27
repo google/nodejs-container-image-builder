@@ -18,6 +18,10 @@ import * as path from 'path';
 
 import {Image} from '../src/index';
 
+process.on('unhandledRejection', (err) => {
+  throw new Error('un handled rejection' + err + err.stack);
+});
+
 describe('makes image object', () => {
   it('can load image data', async () => {
     const image = new Image('node:lts-slim');
@@ -29,6 +33,25 @@ describe('makes image object', () => {
         'should have media type in manifest');
     assert.ok(data.config.rootfs, 'should have rootfs in config.');
   });
+
+
+  it('can catch error from loading image data', async () => {
+    const errstring = 'getting manifest is broken';
+    const image = new Image('node:lts-slim');
+    const client = await image.client();
+    client.manifest = () => {
+      throw new Error(errstring);
+    };
+
+    try {
+      await image.getImageData();
+    } catch (e) {
+      assert.ok(e.message.indexOf(errstring) > -1, 'should have caught error');
+      return;
+    }
+    assert.fail('should have thrown from getImage data');
+  });
+
 
   it('downloads all of blob stream', (done) => {
     (async () => {
