@@ -1,3 +1,12 @@
+## [2.0.1](https://github.com/google/nodejs-container-image-builder/compare/v2.0.0...v2.0.1) (2019-06-27)
+
+
+### Bug Fixes
+
+* unhandled rejection form getImageData after constructing an image ([#34](https://github.com/google/nodejs-container-image-builder/issues/34)) ([152b741](https://github.com/google/nodejs-container-image-builder/commit/152b741))
+
+
+
 # [2.0.0](https://github.com/google/nodejs-container-image-builder/compare/v1.1.2...v2.0.0) (2019-06-26)
 
 

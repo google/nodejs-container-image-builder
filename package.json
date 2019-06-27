@@ -1,6 +1,6 @@
 {
   "name": "container-image-builder",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "container image builder. without docker, docker/oci registry client and image building helpers for protocol version 2",
   "main": "build/src/index.js",
   "keywords": [],
@@ -43,6 +43,6 @@
     "walkdir": "^0.4.0"
   },
   "publishConfig": {
-    "registry":"https://wombat-dressing-room.appspot.com/container-image-builder/_ns"
+    "registry": "https://wombat-dressing-room.appspot.com/container-image-builder/_ns"
   }
 }
