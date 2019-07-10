@@ -20,7 +20,7 @@ Create a new image based off of the official node image with your files in it.
 const image = new Image('node:lts-slim','gcr.io/my-project/my-image')
 
 // add local files to the image.
-await image.addFiles({"./":'/directory-root-for-files-in-container'})
+await image.addFiles({'/directory-root-for-files-in-container':"./"})
 
 // creates a layer in the image with files like
 // /directory-root-for-files-in-container/[the files in ./]
