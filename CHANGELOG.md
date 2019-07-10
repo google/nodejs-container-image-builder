@@ -1,3 +1,12 @@
+## [2.0.2](https://github.com/google/nodejs-container-image-builder/compare/v2.0.1...v2.0.2) (2019-07-10)
+
+
+### Bug Fixes
+
+* foix readme example ([a7a828a](https://github.com/google/nodejs-container-image-builder/commit/a7a828a))
+
+
+
 ## [2.0.1](https://github.com/google/nodejs-container-image-builder/compare/v2.0.0...v2.0.1) (2019-06-27)
 
 
