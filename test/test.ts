@@ -81,9 +81,12 @@ describe('makes image object', () => {
   });
 
   it('can save', async () => {
+    if (!process.env.GCR_PROJECT) {
+      throw new Error('GCR_PROJECT environment variable required.');
+    }
     const ID = Date.now();
-    const targetImage = 'gcr.io/' +
-        (process.env.GCR_PROJECT || 'ryan-gcr-test') + '/integration-' + ID;
+    const targetImage =
+        'gcr.io/' + (process.env.GCR_PROJECT) + '/integration-' + ID;
 
     const image = new Image('node:lts-slim', targetImage);
     const data = await image.getImageData();
