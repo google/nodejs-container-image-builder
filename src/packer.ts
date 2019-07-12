@@ -175,7 +175,7 @@ function pathToReadEntry(opts: {
   }
 
   const header = new Header({
-                   path: toPath,
+                   path: toPath.replace(/\\/g, '/'),
                    // if this is a link. the path the link points to.
                    linkpath: linkpath || (stat as CustomFile).linkPath,
                    mode: modeFix(stat.mode, stat.isDirectory()),
