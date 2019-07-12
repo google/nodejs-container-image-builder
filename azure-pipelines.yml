@@ -20,6 +20,5 @@ steps:
     dockerVersion: 17.09.0-ce
     releaseType: stable
 - script: |
-    npm install
-    npm test
+    npm it
   displayName: 'npm test'
