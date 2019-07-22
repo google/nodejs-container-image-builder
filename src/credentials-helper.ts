@@ -43,7 +43,6 @@ export class DockerCredentialHelpers {
       const helper =
           'docker-credential-' + this.dockerConfig.credHelpers![host];
 
-      // console.log('cred helper ', helper);
       let endCount = 0;
       const bufs: Buffer[] = [];
       const ebufs: Buffer[] = [];

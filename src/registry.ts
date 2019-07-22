@@ -231,11 +231,13 @@ export class RegistryClient {
               return reject(err);
             }
 
-            // TODO: parse the location header instead of the legacy
-            // docker-upload-uuid see
+
+            // TODO: use the location header directly instead of the legacy
+            // header. docker-upload-uuid see
             // https://github.com/opencontainers/distribution-spec/pull/38 for
             // context (note from jonjohnson@)
-            let uuid = res.headers['docker-upload-uuid'];
+            let uuid = res.headers['docker-upload-uuid'] ||
+                (res.headers.location || '').split('/').pop();
 
             if (!uuid) {
               return reject(new Error(
@@ -298,7 +300,9 @@ export class RegistryClient {
                   if (res.statusCode !== 204) {
                     return reject(new Error(
                         'unexpected status code ' + res.statusCode +
-                        ' for patch upload'));
+                        ' for patch upload (111)' +
+                        `https://${this._registry}/v2/${
+                            this._repository}/blobs/uploads/${uuid}`));
                   }
 
                   uuid = res.headers['docker-upload-uuid'] ?
@@ -320,8 +324,6 @@ export class RegistryClient {
                         }
                       },
                       (err: Error, res: Response, body: Buffer) => {
-                        // console.error(err,res.statusCode,res.headers,body+'')
-
                         if (err) return reject(err);
                         if (res.statusCode !== 201) {
                           return reject(new Error(

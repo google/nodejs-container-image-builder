@@ -13,34 +13,58 @@
 // limitations under the License.
 //
 import {auth, GoogleAuthOptions} from 'google-auth-library';
+import * as request from 'request';
 
 import {DockerAuthResult} from '../credentials-helper';
 import {ImageLocation} from '../image-specifier';
 
 // i dont know what the options will be yet
 // tslint:disable-next-line:no-any
-export const handler =
-    async(image: ImageLocation, scope: string, options: GoogleAuthOptions):
-        Promise<DockerAuthResult> => {
-          // google auth options:
-          // https://github.com/googleapis/google-auth-library-nodejs/blob/master/src/auth/googleauth.ts#L58
+export const handler = async(
+    image: ImageLocation, scope: string,
+    options: GoogleAuthOptions): Promise<DockerAuthResult> => {
+  // google auth options:
+  // https://github.com/googleapis/google-auth-library-nodejs/blob/master/src/auth/googleauth.ts#L58
 
-          // expects GOOGLE_APPLICATION_CREDENTIALS env or options
-          const resolvedOptions: GoogleAuthOptions = options || {};
-          if (!('scopes' in resolvedOptions)) {
-            // Depending on `scope` that describes push and/or pull
-            // capabilities, the Google services scope need to be specified to
-            // authenticate for reading or reading and writing to the Google
-            // Container Registry.
-            //
-            // Note: `scope` is either `pull` or `pull,push` and specifies
-            // reading or reading and writing to a registry respectively.
-            resolvedOptions.scopes = scope.indexOf('push') > -1 ?
-                'https://www.googleapis.com/auth/devstorage.read_write' :
-                'https://www.googleapis.com/auth/devstorage.read_only';
+  // expects GOOGLE_APPLICATION_CREDENTIALS env or options
+  const resolvedOptions: GoogleAuthOptions = options || {};
+  if (!('scopes' in resolvedOptions)) {
+    // Depending on `scope` that describes push and/or pull
+    // capabilities, the Google services scope need to be specified to
+    // authenticate for reading or reading and writing to the Google
+    // Container Registry.
+    //
+    // Note: `scope` is either `pull` or `pull,push` and specifies
+    // reading or reading and writing to a registry respectively.
+    resolvedOptions.scopes = scope.indexOf('push') > -1 ?
+        'https://www.googleapis.com/auth/devstorage.read_write' :
+        'https://www.googleapis.com/auth/devstorage.read_only';
+  }
+  const client = await auth.getClient(resolvedOptions);
+  const token = (await client.getAccessToken()).token || undefined;
+
+  // image.
+  const authUrl = `https://${image.registry}/v2/token?service=gcr.io&scope=${
+      encodeURIComponent(
+          `repository:${image.namespace}/${image.image}:push,pull`)}`;
+
+  await new Promise((resolve, reject) => {
+    request.get(
+        {url: authUrl, headers: {Authorization: 'Bearer ' + token}},
+        (err, res, body) => {
+          if (err || res.statusCode !== 200) {
+            reject(
+                err ||
+                new Error(
+                    'unexpected statusCode ' + res.statusCode +
+                    ' from gcr token request'));
           }
-          const client = await auth.getClient(resolvedOptions);
-          const token = (await client.getAccessToken()).token || undefined;
-
-          return {Username: '_token', Secret: token, token};
-        };
+          try {
+            resolve(JSON.parse(body));
+          } catch (e) {
+            reject(e);
+          }
+        });
+  });
+  return {Username: '_token', Secret: token, token};
+};
