@@ -80,8 +80,15 @@ export class DockerCredentialHelpers {
   readDockerConfig(customPath?: string) {
     try {
       this.dockerConfig =
-          (JSON.parse(fs.readFileSync(customPath || (process.env.DOCKER_CONFIG?path.join(process.env.DOCKER_CONFIG,'config.json'):false) || defaultPath) + '') || {}) as
-          DockerCredsConfig;
+          (JSON.parse(
+               fs.readFileSync(
+                   customPath ||
+                   (process.env.DOCKER_CONFIG ?
+                        path.join(process.env.DOCKER_CONFIG, 'config.json') :
+                        false) ||
+                   defaultPath) +
+               '') ||
+           {}) as DockerCredsConfig;
     } catch (e) {
     }
     return this.dockerConfig;
