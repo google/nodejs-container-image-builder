@@ -195,12 +195,13 @@ export class RegistryClient {
           if (err) return reject(err);
 
           if (res.headers.location) {
+            console.log('location redirect --> ',opts.url,res.headers.location);
             return fetch(urlModule.resolve(url, res.headers.location));
           }
 
           if (res.statusCode !== 200) {
             return reject(new Error(
-                'unexpected status code ' + res.statusCode + ' ' + body));
+                'unexpected status code for '+opts.url +' ' + res.statusCode + ' ' + body));
           }
           return resolve(body);
         });

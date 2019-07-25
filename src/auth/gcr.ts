@@ -48,7 +48,7 @@ export const handler = async(
       encodeURIComponent(
           `repository:${image.namespace}/${image.image}:push,pull`)}`;
 
-  await new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     request.get(
         {url: authUrl, headers: {Authorization: 'Bearer ' + token}},
         (err, res, body) => {
@@ -56,7 +56,7 @@ export const handler = async(
             reject(
                 err ||
                 new Error(
-                    'unexpected statusCode ' + res.statusCode +
+                    'unexpected statusCode ' + authUrl +' '+ res.statusCode +
                     ' from gcr token request'));
           }
           try {
@@ -66,5 +66,5 @@ export const handler = async(
           }
         });
   });
-  return {Username: '_token', Secret: token, token};
+  //return {Username: '_token', Secret: token, token};
 };
