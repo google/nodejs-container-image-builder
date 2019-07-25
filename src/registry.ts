@@ -168,6 +168,10 @@ export class RegistryClient {
           followRedirect: false
         };
 
+        if(url.indexOf('https://'+this._registry) === -1){
+            delete opts.headers.Authorization;
+        }
+
         if (stream) {
           const req = request.get(opts);
           req.on('response', (res: Response) => {
