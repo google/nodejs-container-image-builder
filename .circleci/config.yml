@@ -32,6 +32,7 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-
+      - run: echo $GOOGLE_APPLICATION_CREDENTIALS > file.json
+      - run: export GOOGLE_APPLICATION_CREDENTIALS=`realpath file.json`
       # run tests!
       - run: npm test
