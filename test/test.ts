@@ -14,6 +14,7 @@
 
 import * as assert from 'assert';
 import * as cp from 'child_process';
+import {withFixtures} from 'inline-fixtures';
 import * as path from 'path';
 
 import {Image} from '../src/index';
@@ -111,15 +112,51 @@ describe('makes image object', () => {
       // ignoreExists: true
     });
 
-    console.log('CREATED: ', targetImage);
-    console.log('trying image in docker');
+    const FIXTURES = {
+      'config.json': `{
+        "credHelpers":{
+          "gcr.io":"integration-test"
+        }
+      }`,
+      'docker-credential-integration-test': {
+        content: `#!/usr/bin/env node
+        process.env.GOOGLE_APPLICATION_CREDENTIALS = ${
+            JSON.stringify(process.env.GOOGLE_APPLICATION_CREDENTIALS)};
+        const auth = require("${require.resolve('google-auth-library')}").auth;
+        const main = async ()=>{
+          const client = await auth.getClient({scopes:"https://www.googleapis.com/auth/devstorage.read_write"});
+          const token = (await client.getAccessToken()).token || undefined;
+          process.stdout.write(JSON.stringify({Secret:token,username:'_dcgcloud_token'}))
+        }
+        main();
+        `,
+        mode: 0o777
+      }
+    };
 
-    const dockerResult = cp.execSync('docker run ' + targetImage + ':pikachu');
+    await withFixtures(FIXTURES, async (fixturesDir) => {
+      console.log('CREATED: ', targetImage);
+      console.log('trying image in docker. have fixtures dir ' + fixturesDir);
 
-    const parsed = JSON.parse(dockerResult + '');
+      const res = cp.spawnSync(
+          path.join(fixturesDir, 'docker-credential-integration-test'));
+      res.output[1] += '';
+      res.output[2] += '';
+      console.log('trying cred helper: ', res);
 
-    assert.strictEqual(
-        +parsed.env.TACO, ID,
-        'should have built a container with the correct cmd and ENV data');
+      const dockerResult =
+          cp.execSync('docker run ' + targetImage + ':pikachu', {
+            env: {
+              DOCKER_CONFIG: fixturesDir,
+              PATH: fixturesDir + ':' + process.env.PATH
+            }
+          });
+
+      const parsed = JSON.parse(dockerResult + '');
+
+      assert.strictEqual(
+          +parsed.env.TACO, ID,
+          'should have built a container with the correct cmd and ENV data');
+    });
   });
 });
