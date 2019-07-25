@@ -104,7 +104,8 @@ export class RegistryClient {
         tag = digest;
       }
 
-      const req = request.put(
+      // tslint:disable-next-line:no-any
+      const req: any = request.put(
           `https://${this._registry}/v2/${this._repository}/manifests/${tag}`, {
             headers: {
               Authorization: this.authHeader(),
@@ -120,7 +121,8 @@ export class RegistryClient {
 
             if (res.statusCode !== 200 && res.statusCode !== 201) {
               return reject(new Error(
-                  'unexpected status code ' + res.statusCode + ' ' + body));
+                  'unexpected status code ' + req.url + ' ' + res.statusCode +
+                  ' ' + body));
             }
 
             resolve({
@@ -179,7 +181,7 @@ export class RegistryClient {
             if (res.statusCode !== 200) {
               res.on('data', () => {});
               reject(new Error(
-                  'unexpected status code ' + res.statusCode +
+                  'unexpected status code ' + url + ' ' + res.statusCode +
                   ' streaming blob'));
               return;
             }
