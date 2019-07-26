@@ -18,7 +18,7 @@ import * as walker from '../src/walker';
 
 const fixturePath = path.resolve(__dirname, '..', '..', 'fixtures', 'project');
 
-describe('ignore file walker', () => {
+describe(__fielname+'', () => {
   it('walks', async () => {
     let result = await walker.walk(fixturePath, {
       return_object: false,
@@ -26,6 +26,9 @@ describe('ignore file walker', () => {
       ignoreFiles: ['.ignore']
     }) as string[];
     result = result.map((path) => path.replace(fixturePath, ''));
+
+    console.log('result----\n',result);
+
     assert.ok(
         result.indexOf('/taco.yaml') === -1,
         'should have honored ignore file and removed taco.yaml');
@@ -39,6 +42,8 @@ describe('ignore file walker', () => {
             {return_object: false, find_links: false, ignores: ['**/test']}) as
         string[];
     result = result.map((path) => path.replace(fixturePath, ''));
+
+
     /*
     [ '/.ignore',
     '/index.js',
