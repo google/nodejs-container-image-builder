@@ -27,8 +27,6 @@ describe(__filename + '', () => {
     }) as string[];
     result = result.map((path) => path.replace(fixturePath, ''));
 
-    console.log('result----\n', result);
-
     assert.ok(
         result.indexOf('/taco.yaml') === -1,
         'should have honored ignore file and removed taco.yaml');

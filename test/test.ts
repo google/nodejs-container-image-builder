@@ -84,7 +84,10 @@ describe('makes image object', () => {
   it('can save', async () => {
     const project = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCR_PROJECT;
     if (!project) {
-      throw new Error('GOOGLE_CLOUD_PROJECT environment variable required.');
+      console.log(
+          'SKIPPING GOOGLE CONTAINER REGISTRY INTEGRATION TESTS BECAUSE NO GOOGLE_CLOUD_PROJECT ENVIRONMENT VARIABLE SET.');
+      return;
+      // throw new Error('GOOGLE_CLOUD_PROJECT environment variable required.');
     }
     const ID = Date.now();
     const targetImage = 'gcr.io/' + (project) + '/integration-' + ID;
