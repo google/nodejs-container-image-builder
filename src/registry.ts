@@ -104,7 +104,8 @@ export class RegistryClient {
         tag = digest;
       }
 
-      const req = request.put(
+      // tslint:disable-next-line:no-any
+      const req: any = request.put(
           `https://${this._registry}/v2/${this._repository}/manifests/${tag}`, {
             headers: {
               Authorization: this.authHeader(),
@@ -120,7 +121,8 @@ export class RegistryClient {
 
             if (res.statusCode !== 200 && res.statusCode !== 201) {
               return reject(new Error(
-                  'unexpected status code ' + res.statusCode + ' ' + body));
+                  'unexpected status code ' + req.url + ' ' + res.statusCode +
+                  ' ' + body));
             }
 
             resolve({
@@ -166,6 +168,10 @@ export class RegistryClient {
           followRedirect: false
         };
 
+        if (url.indexOf('https://' + this._registry) === -1) {
+          delete opts.headers.Authorization;
+        }
+
         if (stream) {
           const req = request.get(opts);
           req.on('response', (res: Response) => {
@@ -179,7 +185,7 @@ export class RegistryClient {
             if (res.statusCode !== 200) {
               res.on('data', () => {});
               reject(new Error(
-                  'unexpected status code ' + res.statusCode +
+                  'unexpected status code ' + url + ' ' + res.statusCode +
                   ' streaming blob'));
               return;
             }
@@ -193,12 +199,15 @@ export class RegistryClient {
           if (err) return reject(err);
 
           if (res.headers.location) {
+            // console.log('location redirect -->
+            // ',opts.url,res.headers.location);
             return fetch(urlModule.resolve(url, res.headers.location));
           }
 
           if (res.statusCode !== 200) {
             return reject(new Error(
-                'unexpected status code ' + res.statusCode + ' ' + body));
+                'unexpected status code for ' + opts.url + ' ' +
+                res.statusCode + ' ' + body));
           }
           return resolve(body);
         });
@@ -231,11 +240,13 @@ export class RegistryClient {
               return reject(err);
             }
 
-            // TODO: parse the location header instead of the legacy
-            // docker-upload-uuid see
+
+            // TODO: use the location header directly instead of the legacy
+            // header. docker-upload-uuid see
             // https://github.com/opencontainers/distribution-spec/pull/38 for
             // context (note from jonjohnson@)
-            let uuid = res.headers['docker-upload-uuid'];
+            let uuid = res.headers['docker-upload-uuid'] ||
+                (res.headers.location || '').split('/').pop();
 
             if (!uuid) {
               return reject(new Error(
@@ -298,7 +309,9 @@ export class RegistryClient {
                   if (res.statusCode !== 204) {
                     return reject(new Error(
                         'unexpected status code ' + res.statusCode +
-                        ' for patch upload'));
+                        ' for patch upload (111)' +
+                        `https://${this._registry}/v2/${
+                            this._repository}/blobs/uploads/${uuid}`));
                   }
 
                   uuid = res.headers['docker-upload-uuid'] ?
@@ -320,8 +333,6 @@ export class RegistryClient {
                         }
                       },
                       (err: Error, res: Response, body: Buffer) => {
-                        // console.error(err,res.statusCode,res.headers,body+'')
-
                         if (err) return reject(err);
                         if (res.statusCode !== 201) {
                           return reject(new Error(

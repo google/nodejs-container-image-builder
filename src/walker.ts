@@ -57,8 +57,13 @@ export const walk = async (
       while (dir.lastIndexOf(path.sep) > -1) {
         if (ignoreTree[dir]) {
           files = files.filter((file) => {
-            const relativeToRuleSource =
+            let relativeToRuleSource =
                 (currentDir + path.sep + file).replace(dir + path.sep, '');
+
+            if (path.sep !== path.posix.sep) {
+              relativeToRuleSource =
+                  relativeToRuleSource.split(path.sep).join(path.posix.sep);
+            }
             // if i have a current dir of
             // "/a/b/c", a file "file", and rules from directory "/a/b"
             // i need to compare the rules to "c/file"

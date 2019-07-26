@@ -14,7 +14,7 @@
 
 import * as fs from 'fs';
 import * as _path from 'path';
-import {PassThrough, Readable, Writable} from 'stream';
+import {PassThrough, Readable, Transform, Writable} from 'stream';
 
 import {logger} from './emitter';
 import * as walker from './walker';
@@ -52,7 +52,16 @@ export const pack =
 
       options = options || {};
 
-      const outer = new PassThrough();
+      const outer: Transform&
+          {_debug_entries_written?: number, _debug_entries_paused?: number} =
+              new Transform({
+                transform(chunk, enc, cb) {
+                  cb(undefined, chunk);
+                }
+              });
+
+      outer._debug_entries_written = 0;
+      outer._debug_entries_paused = 0;
 
       // flatten every link into the tree its in
       options.find_links = false;
@@ -70,9 +79,15 @@ export const pack =
           Object.assign({}, options.tar || {}, {gzip: false, jobs: Infinity}));
 
       let working = false;
-      const work = () => {
-        if (working) return;
+      let paused = 0;
 
+      const work = () => {
+        if (working || paused) {
+          if (paused === 1) {
+            paused++;
+          }
+          return;
+        }
         const obj = queue.shift();
         if (!obj) {
           if (walkEnded) {
@@ -92,12 +107,28 @@ export const pack =
           working = false;
           work();
         });
+
+        entry.on('pause', () => {
+          console.log('entry paused');
+        });
+
         entry.on('error', (err: Error) => {
           pack.emit('error', err);
         });
 
-        pack.write(entry);
+        // this is for testing back pressure propagation.
+        outer._debug_entries_written!++;
+
+        if (!pack.write(entry)) {
+          paused = 1;
+          outer._debug_entries_paused!++;
+        }
       };
+
+      pack.on('drain', () => {
+        paused = 0;
+        work();
+      });
 
 
       let walkEnded = false;
@@ -170,7 +201,15 @@ function pathToReadEntry(opts: {
 
   // add trailing / to directory paths
   toPath = toPath || path;
-  if (stat.isDirectory() && path.substr(-1) !== '/') {
+
+  if (process.platform === 'win32') {
+    if (_path.isAbsolute(toPath) && toPath.indexOf(':\\\\') > -1) {
+      toPath = (toPath.split(':\\\\')[1] || toPath);
+    }
+    toPath = toPath.split(_path.sep).join(_path.posix.sep);
+  }
+
+  if (stat.isDirectory() && toPath.substr(-1) !== '/') {
     toPath += '/';
   }
 
@@ -279,7 +318,6 @@ function entryTypeToMode(type: string) {
       'unsupported entry type ' + type +
       '. support types are "Directory", "SymbolicLink", "File"');
 }
-
 
 interface Header {
   // tslint:disable-next-line:no-any

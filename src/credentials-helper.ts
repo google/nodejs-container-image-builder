@@ -12,14 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as cp from 'child_process';
+import * as spawn from 'cross-spawn';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
 
+
 // i would use home-path here but im not sure if the docker cli config file even
 // exists in the user home dir in windows.
-const defaultPath = path.join(process.env.HOME || '', '.docker', 'config.json');
+const defaultPath = path.join(
+    process.env.HOME || process.env.USERPROFILE || '', '.docker',
+    'config.json');
 
 export class DockerCredentialHelpers {
   private dockerConfig: DockerCredsConfig = {};
@@ -43,7 +46,6 @@ export class DockerCredentialHelpers {
       const helper =
           'docker-credential-' + this.dockerConfig.credHelpers![host];
 
-      // console.log('cred helper ', helper);
       let endCount = 0;
       const bufs: Buffer[] = [];
       const ebufs: Buffer[] = [];
@@ -59,7 +61,7 @@ export class DockerCredentialHelpers {
           resolve((json(Buffer.concat(bufs)) || {}) as DockerAuthResult);
         }
       };
-      const proc = cp.spawn(helper, ['get']);
+      const proc = spawn(helper, ['get']);
       proc.on('exit', (code) => {
         if (code) {
           return reject(new Error(
@@ -81,8 +83,15 @@ export class DockerCredentialHelpers {
   readDockerConfig(customPath?: string) {
     try {
       this.dockerConfig =
-          (JSON.parse(fs.readFileSync(customPath || defaultPath) + '') || {}) as
-          DockerCredsConfig;
+          (JSON.parse(
+               fs.readFileSync(
+                   customPath ||
+                   (process.env.DOCKER_CONFIG ?
+                        path.join(process.env.DOCKER_CONFIG, 'config.json') :
+                        false) ||
+                   defaultPath) +
+               '') ||
+           {}) as DockerCredsConfig;
     } catch (e) {
     }
     return this.dockerConfig;

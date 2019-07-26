@@ -290,8 +290,6 @@ export class Image {
         await client.upload(Buffer.from(JSON.stringify(imageData.config)));
     imageData.manifest.config.digest = uploadResult.digest;
     imageData.manifest.config.size = uploadResult.contentLength;
-    // console.log('config upload result.', uploadResult);
-
     // put the manifest once per tag
     return Promise
         .all(tags.filter((v) => !!v).map((tag) => {
@@ -369,7 +367,7 @@ export class Image {
               }
             });
           };
-          return retry(action, {retries: 3});
+          return retry(action, {retries: 3}).then(() => true);
         }
         return true;
       });
@@ -424,9 +422,9 @@ export const auth = async (
           image, scope, options ? options['docker.io'] : undefined);
     }
   } catch (e) {
-    // console.error(
-    //    'gcr or docker.io auth threw.\n' + e +
-    //    '\n falling back to cred helpers.');
+    console.error(
+        'gcr or docker.io auth threw.\n' + e +
+        '\n falling back to cred helpers.');
   }
 
 

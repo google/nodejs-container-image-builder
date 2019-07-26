@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/node:7.10
+      - image: circleci/node:lts
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -18,7 +18,8 @@ jobs:
 
     steps:
       - checkout
-
+      - setup_remote_docker:
+         docker_layer_caching: true 
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -32,6 +33,6 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-
+      - run: echo $_JSON_APPLICATION_CREDENTIALS > ./creds.json
       # run tests!
-      - run: npm test
+      - run: GOOGLE_APPLICATION_CREDENTIALS=`realpath ./creds.json` npm test
