@@ -213,6 +213,8 @@ function pathToReadEntry(opts: {
     toPath += '/';
   }
 
+  console.log('-->', toPath);
+
   const header = new Header({
                    path: toPath,
                    // if this is a link. the path the link points to.
