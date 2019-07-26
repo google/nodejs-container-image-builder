@@ -20,7 +20,7 @@ import * as url from 'url';
 
 // i would use home-path here but im not sure if the docker cli config file even
 // exists in the user home dir in windows.
-const defaultPath = path.join(process.env.HOME || '', '.docker', 'config.json');
+const defaultPath = path.join(process.env.HOME || process.env.USERPROFILE || '', '.docker', 'config.json');
 
 export class DockerCredentialHelpers {
   private dockerConfig: DockerCredsConfig = {};
