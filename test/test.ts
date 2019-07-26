@@ -146,10 +146,10 @@ describe('makes image object', () => {
       */
       const dockerResult =
           cp.execSync('docker run ' + targetImage + ':pikachu', {
-            env: {
+            env: Object.assign({}, process.env, {
               DOCKER_CONFIG: fixturesDir,
               PATH: fixturesDir + ':' + process.env.PATH
-            }
+            })
           });
 
       const parsed = JSON.parse(dockerResult + '');

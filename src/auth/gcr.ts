@@ -56,7 +56,7 @@ export const handler = async(
             reject(
                 err ||
                 new Error(
-                    'unexpected statusCode ' + authUrl +' '+ res.statusCode +
+                    'unexpected statusCode ' + authUrl + ' ' + res.statusCode +
                     ' from gcr token request'));
           }
           try {
@@ -66,5 +66,5 @@ export const handler = async(
           }
         });
   });
-  //return {Username: '_token', Secret: token, token};
+  // return {Username: '_token', Secret: token, token};
 };

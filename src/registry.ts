@@ -168,8 +168,8 @@ export class RegistryClient {
           followRedirect: false
         };
 
-        if(url.indexOf('https://'+this._registry) === -1){
-            delete opts.headers.Authorization;
+        if (url.indexOf('https://' + this._registry) === -1) {
+          delete opts.headers.Authorization;
         }
 
         if (stream) {
@@ -199,13 +199,15 @@ export class RegistryClient {
           if (err) return reject(err);
 
           if (res.headers.location) {
-            //console.log('location redirect --> ',opts.url,res.headers.location);
+            // console.log('location redirect -->
+            // ',opts.url,res.headers.location);
             return fetch(urlModule.resolve(url, res.headers.location));
           }
 
           if (res.statusCode !== 200) {
             return reject(new Error(
-                'unexpected status code for '+opts.url +' ' + res.statusCode + ' ' + body));
+                'unexpected status code for ' + opts.url + ' ' +
+                res.statusCode + ' ' + body));
           }
           return resolve(body);
         });
