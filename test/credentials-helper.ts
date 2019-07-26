@@ -23,10 +23,7 @@ describe('can get token from credential helper.', () => {
     const helper =
         new DockerCredentialHelpers(path.join(fixtureDir, 'docker.json'));
 
-
-    console.log('--->>>ENVVVV-->>> ',process.env)
-
-    process.env.PATH += ':' + fixtureDir;
+    process.env.PATH += path.delimiter + fixtureDir;
 
     const config = helper.getDockerConfig();
 
