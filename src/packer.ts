@@ -207,8 +207,8 @@ function pathToReadEntry(opts: {
     if (_path.isAbsolute(toPath) && toPath.indexOf(':\\\\') > -1) {
       console.log('absolute path? ', toPath);
       toPath = (toPath.split(':\\\\')[1] || toPath);
-      if(toPath[0] !== '/'){
-        toPath = '/'+toPath;
+      if(toPath[0] !== '\\'){
+        toPath = '\\'+toPath;
       }
     }
     toPath = toPath.split(_path.sep).join(_path.posix.sep);
