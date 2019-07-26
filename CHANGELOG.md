@@ -1,3 +1,22 @@
+## [2.0.3](https://github.com/google/nodejs-container-image-builder/compare/v2.0.2...v2.0.3) (2019-07-26)
+
+
+### Bug Fixes
+
+* pause and gcr auth should not work on new gcrs ([3a1f16c](https://github.com/google/nodejs-container-image-builder/commit/3a1f16c))
+* replace spaen for cross-spawn in creds helper for windows ([1a27b6c](https://github.com/google/nodejs-container-image-builder/commit/1a27b6c))
+* skipping gcr integration test on windows ([baf753a](https://github.com/google/nodejs-container-image-builder/commit/baf753a))
+* undefined topath ([24922c5](https://github.com/google/nodejs-container-image-builder/commit/24922c5))
+* windows link support workarounds in tests ([893e8ca](https://github.com/google/nodejs-container-image-builder/commit/893e8ca))
+
+
+### Features
+
+* do not sent auth information to 3rd parties after a redirect ([953eb3b](https://github.com/google/nodejs-container-image-builder/commit/953eb3b))
+* support DOCKER_CONFIG env var to find config ([d7565b4](https://github.com/google/nodejs-container-image-builder/commit/d7565b4))
+
+
+
 ## [2.0.2](https://github.com/google/nodejs-container-image-builder/compare/v2.0.1...v2.0.2) (2019-07-10)
 
 
