@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import * as cp from 'child_process';
+import * as spawn from 'cross-spawn';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
+
 
 // i would use home-path here but im not sure if the docker cli config file even
 // exists in the user home dir in windows.
@@ -58,7 +59,7 @@ export class DockerCredentialHelpers {
           resolve((json(Buffer.concat(bufs)) || {}) as DockerAuthResult);
         }
       };
-      const proc = cp.spawn(helper, ['get']);
+      const proc = spawn(helper, ['get']);
       proc.on('exit', (code) => {
         if (code) {
           return reject(new Error(

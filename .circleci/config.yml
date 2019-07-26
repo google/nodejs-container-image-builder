@@ -18,7 +18,8 @@ jobs:
 
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+         docker_layer_caching: true 
       # Download and cache dependencies
       - restore_cache:
           keys:
@@ -33,6 +34,5 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
       - run: echo $_JSON_APPLICATION_CREDENTIALS > ./creds.json
-      - run: env
       # run tests!
       - run: GOOGLE_APPLICATION_CREDENTIALS=`realpath ./creds.json` npm test
