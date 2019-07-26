@@ -201,11 +201,13 @@ function pathToReadEntry(opts: {
 
   // add trailing / to directory paths
   toPath = toPath || path;
+  console.log('1-->', toPath);
 
   if (process.platform === 'win32') {
     if (_path.isAbsolute(toPath)) {
-      toPath = '/' + toPath.split(':\\\\')[1] || toPath;
+      toPath = '/' + (toPath.split(':\\\\')[1] || toPath);
     }
+    console.log('2-->', toPath);
     toPath = toPath.split(_path.sep).join(_path.posix.sep);
   }
 
@@ -213,7 +215,7 @@ function pathToReadEntry(opts: {
     toPath += '/';
   }
 
-  console.log('-->', toPath);
+  console.log('3-->', toPath);
 
   const header = new Header({
                    path: toPath,
