@@ -18,7 +18,7 @@ import * as walker from '../src/walker';
 
 const fixturePath = path.resolve(__dirname, '..', '..', 'fixtures', 'project');
 
-describe(__fielname+'', () => {
+describe(__filename + '', () => {
   it('walks', async () => {
     let result = await walker.walk(fixturePath, {
       return_object: false,
@@ -27,7 +27,7 @@ describe(__fielname+'', () => {
     }) as string[];
     result = result.map((path) => path.replace(fixturePath, ''));
 
-    console.log('result----\n',result);
+    console.log('result----\n', result);
 
     assert.ok(
         result.indexOf('/taco.yaml') === -1,
