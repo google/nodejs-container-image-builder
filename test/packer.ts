@@ -52,14 +52,25 @@ describe('can pack', () => {
       e.resume();
     });
 
+    let files = [
+      'apples/.ignore', 'apples/index.js', 'apples/lib/',
+      'apples/lib/a-file.js', 'apples/test/', 'apples/test/test.js'
+    ];
+
+    if (process.platform === 'win32') {
+      // git clones symlinks on windows to regular test files with their target
+      // path in them.
+      files = [
+        'apples/.ignore', 'apples/index.js', 'apples/lib', 'apples/test/',
+        'apples/test/test.js'
+      ];
+    }
+
+
     extract.on('end', () => {
       paths = paths.sort();
       assert.deepStrictEqual(
-          [
-            'apples/.ignore', 'apples/index.js', 'apples/lib/',
-            'apples/lib/a-file.js', 'apples/test/', 'apples/test/test.js'
-          ],
-          paths, 'ignored files in globs in ignore files');
+          files, paths, 'ignored files in globs in ignore files');
 
       console.log(paths);
       done();
@@ -82,14 +93,23 @@ describe('can pack', () => {
       e.resume();
     });
 
+
+
+    let files = [
+      'apples/.ignore', 'apples/index.js', 'apples/lib/', 'apples/lib/a-file.js'
+    ];
+
+    if (process.platform === 'win32') {
+      // git clones symlinks on windows to regular test files with their target
+      // path in them.
+      files = ['apples/.ignore', 'apples/index.js', 'apples/lib'];
+    }
+
+
     extract.on('end', () => {
       paths = paths.sort();
       assert.deepStrictEqual(
-          [
-            'apples/.ignore', 'apples/index.js', 'apples/lib/',
-            'apples/lib/a-file.js'
-          ],
-          paths, 'ignored test files with **/test glob');
+          files, paths, 'ignored test files with **/test glob');
 
       console.log(paths);
       done();
@@ -113,15 +133,22 @@ describe('can pack', () => {
       e.resume();
     });
 
+    let files = [
+      'apples/.ignore', 'apples/index.js', 'apples/lib/',
+      'apples/lib/a-file.js', 'apples/test/', 'apples/test/taco.yaml',
+      'apples/test/test.js', 'oranges/a-file.js'
+    ];
+    if (process.platform === 'win32') {
+      files = [
+        'apples/.ignore', 'apples/index.js', 'apples/lib', 'apples/test/',
+        'apples/test/taco.yaml', 'apples/test/test.js', 'oranges/a-file.js'
+      ];
+    }
+
     extract.on('end', () => {
       paths = paths.sort();
       assert.deepStrictEqual(
-          [
-            'apples/.ignore', 'apples/index.js', 'apples/lib/',
-            'apples/lib/a-file.js', 'apples/test/', 'apples/test/taco.yaml',
-            'apples/test/test.js', 'oranges/a-file.js'
-          ],
-          paths, 'should have tarred exactly the specified entries');
+          files, paths, 'should have tarred exactly the specified entries');
 
       console.log(paths);
       done();

@@ -201,6 +201,14 @@ function pathToReadEntry(opts: {
 
   // add trailing / to directory paths
   toPath = toPath || path;
+
+  if (process.platform === 'win32') {
+    if (_path.isAbsolute(toPath)) {
+      toPath = '/' + toPath.split(':\\\\')[1];
+    }
+    toPath = toPath.split(_path.sep).join(_path.posix.sep);
+  }
+
   if (stat.isDirectory() && path.substr(-1) !== '/') {
     toPath += '/';
   }
