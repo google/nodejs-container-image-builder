@@ -137,13 +137,13 @@ describe('makes image object', () => {
     await withFixtures(FIXTURES, async (fixturesDir) => {
       console.log('CREATED: ', targetImage);
       console.log('trying image in docker. have fixtures dir ' + fixturesDir);
-
+      /*
       const res = cp.spawnSync(
           path.join(fixturesDir, 'docker-credential-integration-test'));
       res.output[1] += '';
       res.output[2] += '';
       console.log('trying cred helper: ', res);
-
+      */
       const dockerResult =
           cp.execSync('docker run ' + targetImage + ':pikachu', {
             env: {
