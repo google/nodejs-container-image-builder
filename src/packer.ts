@@ -203,18 +203,14 @@ function pathToReadEntry(opts: {
   toPath = toPath || path;
   
   if (process.platform === 'win32') {
-    toPath = 'C://'+toPath;
     if (_path.isAbsolute(toPath) && toPath.indexOf(':\\\\') > -1) {
       console.log('absolute path? ', toPath);
       toPath = (toPath.split(':\\\\')[1] || toPath);
-      if(toPath[0] !== '\\'){
-        toPath = '\\'+toPath;
-      }
     }
     toPath = toPath.split(_path.sep).join(_path.posix.sep);
   }
 
-  if (stat.isDirectory() && path.substr(-1) !== '/') {
+  if (stat.isDirectory() && toPath.substr(-1) !== '/') {
     toPath += '/';
   }
 
