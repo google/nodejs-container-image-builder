@@ -205,7 +205,7 @@ function pathToReadEntry(opts: {
 
   if (process.platform === 'win32') {
     if (_path.isAbsolute(toPath)) {
-      console.log('absolut path? ', toPath);
+      console.log('absolute path? ', toPath);
       toPath = (toPath.split(':\\\\')[1] || toPath);
       // if(toPath[0] !== '/'){
       // toPath = '/'+toPath;

@@ -22,14 +22,23 @@ describe('can pack', () => {
       e.resume();
     });
 
+    let files = [
+      'apples/.ignore', 'apples/index.js', 'apples/lib/',
+      'apples/lib/a-file.js', 'apples/test/', 'apples/test/taco.yaml',
+      'apples/test/test.js'
+    ]
+    if(process.platform === 'win32'){
+      files = [
+        'apples/.ignore', 'apples/index.js', 'apples/lib',
+        'apples/test/', 'apples/test/taco.yaml',
+        'apples/test/test.js'
+      ]
+    }
+
     extract.on('end', () => {
       paths = paths.sort();
       assert.deepStrictEqual(
-          [
-            'apples/.ignore', 'apples/index.js', 'apples/lib/',
-            'apples/lib/a-file.js', 'apples/test/', 'apples/test/taco.yaml',
-            'apples/test/test.js'
-          ],
+          files,
           paths, 'should have tarred exactly the specified entries');
 
       console.log(paths);
