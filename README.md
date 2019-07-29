@@ -280,7 +280,7 @@ for all other cases it'll fall back to using docker credential helpers already i
         - options['any.gcr.io/google-cloud-project']
         - options['any.gcr.io']
         - options['gcr.io'] = {...}
-            - these are auth options passed directly to [google-auth-library](https://www.npmjs.com/package/google-auth-library).
+            - see <a href="#GCRAuthOptions">GCRAuthOptions</a> for valid properties.
             - you can also set the environment variable `GOOGLE_APPLICATION_CREDENTIALS=path to key file.json` and it will work as expected like other google client libraries.
             - if you need to authenticate to multiple GCR projects you can provide multiple sets of crdentials directly as auth options.
 
