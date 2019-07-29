@@ -1,3 +1,21 @@
+# [3.0.0](https://github.com/google/nodejs-container-image-builder/compare/v2.0.2...v3.0.0) (2019-07-29)
+
+
+### Features
+
+* only support a subset of google auth options ([#40](https://github.com/google/nodejs-container-image-builder/issues/40)) ([fc4c91f](https://github.com/google/nodejs-container-image-builder/commit/fc4c91f))
+
+
+### BREAKING CHANGES
+
+* drop support for passing GoogleAuthOptions directly to
+google-auth-library. only suppports GOOGLE_APPLICATION_CRDENTIALS env,
+credentials, and keyFilename
+
+updated docs
+
+
+
 ## [2.0.2](https://github.com/google/nodejs-container-image-builder/compare/v2.0.1...v2.0.2) (2019-07-10)
 
 
