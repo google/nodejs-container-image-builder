@@ -283,7 +283,9 @@ const image = new Image('gcr.io/project1/image','us.gcr.io/project2/image',{
 })
 
 console.log(await image.save())
+
 ```
+
         - options['docker.io'] = {...}
             - accepts these options. all are strings.
             - either `token` is required or `Username`,`Secret` is required. we'll either try Basic or Bearer auth depending on credentials provided.
