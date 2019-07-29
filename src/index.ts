@@ -413,7 +413,10 @@ export const auth = async (
   try {
     if (image.registry.indexOf('gcr.io') > -1) {
       return await gcrAuth(
-          image, scope, options ? options['gcr.io'] || {} : {});
+          image, scope,
+          options ? options[image.registry + '/' + image.namespace] ||
+                  options['registry'] || options['gcr.io'] || {} :
+                    {});
     } else if (image.registry.indexOf('docker.io') > -1) {
       // dockerhub requires you log in every 5 minutes.
       // we'll always try to get a new token for the user with the provided auth

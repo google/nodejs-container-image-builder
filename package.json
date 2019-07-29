@@ -38,7 +38,7 @@
     "typescript": "~3.1.0"
   },
   "dependencies": {
-    "google-auth-library": "^3.0.1",
+    "google-auth-library": "^5.1.0",
     "micromatch": "^3.1.10",
     "p-retry": "^3.0.1",
     "request": "^2.88.0",

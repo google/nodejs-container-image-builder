@@ -125,9 +125,11 @@ describe('makes image object', () => {
         content: `#!/usr/bin/env node
         process.env.GOOGLE_APPLICATION_CREDENTIALS = ${
             JSON.stringify(process.env.GOOGLE_APPLICATION_CREDENTIALS)};
-        const auth = require("${require.resolve('google-auth-library')}").auth;
+        const {GoogleAuth} = require("${
+            require.resolve('google-auth-library')}");
         const main = async ()=>{
-          const client = await auth.getClient({scopes:"https://www.googleapis.com/auth/devstorage.read_write"});
+          const auth = new GoogleAuth({scopes:"https://www.googleapis.com/auth/devstorage.read_write"})
+          const client = await auth.getClient();
           const token = (await client.getAccessToken()).token || undefined;
           process.stdout.write(JSON.stringify({Secret:token,username:'_dcgcloud_token'}))
         }

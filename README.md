@@ -59,6 +59,8 @@ const image = new Image('node:lts-slim','myspecialregistry.io/my-project/my-imag
 
 Also if you have a docker credential helper installed on the system, and in your docker config that matches the registry we'll call it before giving up.
 
+
+
 see <a href="#docker-registry-auth">auth information</a> for more.
 
 
@@ -119,9 +121,8 @@ Defined in the order that they compose into an "Image":
     - targetImage
         the name of the image you're going to be saving to. calls to image.save() will replace this image.
     - options (ImageOptions)
-        - auth - {'container registry cname':{registry credentials}}
+        - auth - {"auth":{'container registry cname':{registry credentials}}}
             - see <a href="#docker-registry-auth">Detailed auth information</a> for more about how to authenticate with any registry.
-
 
 - `image.addFiles({[targetDirectory]:localDirectory},options): Promise<..>`
 
@@ -264,9 +265,13 @@ for all other cases it'll fall back to using docker credential helpers already i
     - scope, string "push" or "push,pull"
         - passed to the auth api if requesting docker hub or `gcr.io`.
     - options
+        - options['any.gcr.io/google-cloud-project']
+        - options['any.gcr.io']
         - options['gcr.io'] = {...}
             - these are auth options passed directly to [google-auth-library](https://www.npmjs.com/package/google-auth-library).
             - you can also set the environment variable `GOOGLE_APPLICATION_CREDENTIALS=path to key file.json` and it will work as expected like other google client libraries.
+            - if you need to authenticate to multiple GCR projects you can provide multiple sets of crdentials directly as auth options.
+
         - options['docker.io'] = {...}
             - accepts these options. all are strings.
             - either `token` is required or `Username`,`Secret` is required. we'll either try Basic or Bearer auth depending on credentials provided.
@@ -358,7 +363,25 @@ like adding a new blob directly to the target registry before you call addLayer.
 
 ## Common actions
 
-TODO. recipes for common workflows here.
+### Authenticating to multiple GCR projects
+
+this example copies 'gcr.io/project1/image' to 'us.gcr.io/project2/image' . 
+The credentials value is the parsed JSON object from the file in GOOGLE_APPLICATION_CREDENTIALS
+
+```js
+const creds1 = JSON.parse(fs.readFileSync(process.env.OTHER_GOOGLE_APPLICATION_CREDENTIALS))
+const creds2 = JSON.parse(fs.readFileSync(process.env.OTHER_GOOGLE_APPLICATION_CREDENTIALS2))
+const image = new Image('gcr.io/project1/image','us.gcr.io/project2/image',{
+  "auth":{
+    'us.gcr.io/project2':{credentials:creds1},
+    'gcr.io/project1':{credentials:creds2},
+  }
+})
+
+console.log(await image.save())
+```
+[working example script](./examples/multiple-gcr.js)
+
 
 ### update env vars or exec path of a container 
 
