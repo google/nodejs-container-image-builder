@@ -120,9 +120,9 @@ Defined in the order that they compose into an "Image":
         the name of the base image. these are image specifiers just like you would pass to other container tools.
     - targetImage
         the name of the image you're going to be saving to. calls to image.save() will replace this image.
-    - options (ImageOptions)
-        - auth - {"auth":{'container registry cname':{registry credentials}}}
-            - see <a href="#docker-registry-auth">Detailed auth information</a> for more about how to authenticate with any registry.
+    - options
+        - see <a href="#ImageOptions">ImageOptions</a> for options.
+        - see <a href="#docker-registry-auth">Detailed auth information</a> for more about how to authenticate with any registry.
 
 - `image.addFiles({[targetDirectory]:localDirectory},options): Promise<..>`
 
@@ -251,6 +251,18 @@ Defined in the order that they compose into an "Image":
     - default new Date(). set to Date if you want to set
 - `customFile.mtime`
     - default new Date(). set to Date if you want to set
+
+- <a name="ImageOptions">ImageOptions</a>
+    - ImageOptions is an object with the optional key auth. if `auth` is provided it will be used to provided authentication metadata for calls to the specified registry. If there is no authentication provider for your particular registry you can an object with the key token as it's value.
+    - `{auth:{'my.registry.io':{token?:string}}}`
+    - default support for docker.io and google container registry (gcr.io) are built in.
+    - if your registry has `gcr.io` in it you can pass <a href="#GCRAuthOptions">additional options</a>.
+
+- <a name="GCRAuthOptions">GCRAuthOptions</a>
+    - {credentials?:{private_key:string,client_email:string},keyFilename?:string,token?:string}
+    - if no options are provided it falls back to using GOOGLE_APPLICATION_CREDENTIALS to provide the keyFilename
+    - the values for crdentials normally come from a key file like you would pass to keyFilename and download as service account credentials.
+
 
 ### docker registry auth
 

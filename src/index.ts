@@ -13,19 +13,16 @@
 // limitations under the License.
 //
 import * as crypto from 'crypto';
-import {GoogleAuthOptions} from 'google-auth-library';
 import * as retry from 'p-retry';
 import * as zlib from 'zlib';
 
 import {handler as dockerAuth} from './auth/dockerio';
-import {handler as gcrAuth} from './auth/gcr';
+import {GCRAuthOptions, handler as gcrAuth} from './auth/gcr';
 import {DockerAuthResult, DockerCredentialHelpers} from './credentials-helper';
 import {ImageLocation, parse as parseSpecifier} from './image-specifier';
 import * as packer from './packer';
 import {pending, PendingTracker} from './pending';
 import {ImageConfig, ManifestV2, RegistryClient} from './registry';
-
-const tar = require('tar');
 
 // expose plain registry client.
 export {RegistryClient} from './registry';
@@ -463,7 +460,7 @@ export const pack = packer.pack;
 export const CustomFile = packer.CustomFile;
 
 export interface AuthConfig {
-  'gcr.io'?: GoogleAuthOptions;
+  'gcr.io'?: GCRAuthOptions;
   // tslint:disable-next-line:no-any
   'docker.io'?: any;
   // tslint:disable-next-line:no-any
