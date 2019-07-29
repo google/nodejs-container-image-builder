@@ -41,8 +41,6 @@ export const handler = async(
         'https://www.googleapis.com/auth/devstorage.read_only';
   }
 
-  console.log('resolved options: ',resolvedOptions)
-
   const auth = new GoogleAuth(resolvedOptions);
   const client = await auth.getClient();
   const token = (await client.getAccessToken()).token || undefined;
