@@ -264,9 +264,26 @@ for all other cases it'll fall back to using docker credential helpers already i
     - scope, string "push" or "push,pull"
         - passed to the auth api if requesting docker hub or `gcr.io`.
     - options
+        - options['any.gcr.io/google-cloud-project']
+        - options['any.gcr.io']
         - options['gcr.io'] = {...}
             - these are auth options passed directly to [google-auth-library](https://www.npmjs.com/package/google-auth-library).
             - you can also set the environment variable `GOOGLE_APPLICATION_CREDENTIALS=path to key file.json` and it will work as expected like other google client libraries.
+            - if you need to authenticate to multiple GCR projects you can provide multiple sets of crdentials directly as auth options.
+```js
+// this example copies 'gcr.io/project1/image' to 'us.gcr.io/project2/image'
+// credentials value is the parsed JSON object from the file in GOOGLE_APPLICATION_CREDENTIALS
+const creds1 = JSON.parse(fs.readFileSync(process.env.OTHER_GOOGLE_APPLICATION_CREDENTIALS))
+const creds2 = JSON.parse(fs.readFileSync(process.env.OTHER_GOOGLE_APPLICATION_CREDENTIALS2))
+const image = new Image('gcr.io/project1/image','us.gcr.io/project2/image',{
+  "auth":{
+    'us.gcr.io/project2':{credentials:creds1},
+    'gcr.io/project1':{credentials:creds2},
+  }
+})
+
+console.log(await image.save())
+```
         - options['docker.io'] = {...}
             - accepts these options. all are strings.
             - either `token` is required or `Username`,`Secret` is required. we'll either try Basic or Bearer auth depending on credentials provided.
