@@ -47,5 +47,8 @@
   },
   "publishConfig": {
     "registry": "https://wombat-dressing-room.appspot.com/container-image-builder/_ns"
+  },
+  "nyc": {
+    "extension":".ts"
   }
 }

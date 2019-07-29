@@ -18,17 +18,31 @@ import * as request from 'request';
 import {DockerAuthResult} from '../credentials-helper';
 import {ImageLocation} from '../image-specifier';
 
+export type GCRAuthOptions = {
+  token?: string,
+  keyFilename?: string,
+  credentials?: {private_key: string, client_email: string}
+};
 
 // i dont know what the options will be yet
 // tslint:disable-next-line:no-any
 export const handler = async(
     image: ImageLocation, scope: string,
-    options: GoogleAuthOptions): Promise<DockerAuthResult> => {
+    options: GCRAuthOptions): Promise<DockerAuthResult> => {
   // google auth options:
   // https://github.com/googleapis/google-auth-library-nodejs/blob/master/src/auth/googleauth.ts#L58
 
+  // client is configured with a valid token from auth.getToken() already. trust
+  // it works.
+  if (options.token) {
+    return {Username: '_token', Secret: options.token, token: options.token};
+  }
+
   // expects GOOGLE_APPLICATION_CREDENTIALS env or options
-  const resolvedOptions: GoogleAuthOptions = options || {};
+  const resolvedOptions: GoogleAuthOptions = {
+    credentials: options.credentials,
+    keyFilename: options.keyFilename
+  };
   if (!('scopes' in resolvedOptions)) {
     // Depending on `scope` that describes push and/or pull
     // capabilities, the Google services scope need to be specified to
