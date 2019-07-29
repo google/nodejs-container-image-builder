@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-import {auth, GoogleAuthOptions} from 'google-auth-library';
+import {GoogleAuth, GoogleAuthOptions} from 'google-auth-library';
 import * as request from 'request';
 
 import {DockerAuthResult} from '../credentials-helper';
@@ -40,10 +40,16 @@ export const handler = async(
         'https://www.googleapis.com/auth/devstorage.read_write' :
         'https://www.googleapis.com/auth/devstorage.read_only';
   }
-  const client = await auth.getClient(resolvedOptions);
+
+  const auth = new GoogleAuth(resolvedOptions);
+  const client = await auth.getClient();
   const token = (await client.getAccessToken()).token || undefined;
 
-  // image.
+  // NOTE: even though we have a valid authentication token we fetch a GCR
+  // specific token here. We could use the standard google access token but GCR
+  // requires this call to lazily initialize your registry for the first time.
+  // If we skip this attempts to put the very first blob into the registry will
+  // fail.
   const authUrl = `https://${image.registry}/v2/token?service=gcr.io&scope=${
       encodeURIComponent(
           `repository:${image.namespace}/${image.image}:push,pull`)}`;
