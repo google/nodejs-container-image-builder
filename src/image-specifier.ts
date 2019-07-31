@@ -22,33 +22,33 @@ const DEFAULT_REGISTRY_ALIAS = 'docker.io';
 export const parse = (specifier: string): ImageLocation => {
   const parts = specifier.split('/');
 
-  let match = /([^/]+\/)?(.+\/)?([^/]+)?$/;
+  const match = /([^/]+\/)?(.+\/)?([^/]+)?$/;
   let matches = specifier.match(match);
 
-  if(!matches) {
-    throw new Error('invalid image specifier: '+specifier)
+  if (!matches) {
+    throw new Error('invalid image specifier: ' + specifier);
   }
   // discard  the everything match
-  matches.shift()
-  matches = matches.filter((v)=>v)
-  
-  let trimSlashes = /^\/|\/$/g
+  matches.shift();
+  matches = matches.filter((v) => v);
 
-  let image:string = matches[matches.length-1]
-  if(image) image = image.replace(trimSlashes,'')
+  const trimSlashes = /^\/|\/$/g;
 
-  let namespace:string|undefined = matches[matches.length-2]
-  if(namespace) namespace = namespace.replace(trimSlashes,'')
+  let image: string = matches[matches.length - 1];
+  if (image) image = image.replace(trimSlashes, '');
 
-  let registry:string|undefined = matches[matches.length-3]
-  if(registry) registry = registry.replace(trimSlashes,'')
+  let namespace: string|undefined = matches[matches.length - 2];
+  if (namespace) namespace = namespace.replace(trimSlashes, '');
 
-  if (!registry){
-    registry = namespace
+  let registry: string|undefined = matches[matches.length - 3];
+  if (registry) registry = registry.replace(trimSlashes, '');
+
+  if (!registry) {
+    registry = namespace;
     namespace = undefined;
   }
-  
-  if(registry === DEFAULT_REGISTRY_ALIAS || !registry) {
+
+  if (registry === DEFAULT_REGISTRY_ALIAS || !registry) {
     namespace = 'library';
     registry = 'index.docker.io';
   }
