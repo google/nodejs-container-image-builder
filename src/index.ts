@@ -227,6 +227,7 @@ export class Image {
     }
 
     image = (image ? image : this.image);
+
     const scope = write ? 'push,pull' : 'pull';
     let key = [image.registry, image.namespace, image.image].join(',');
 

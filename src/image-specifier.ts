@@ -22,27 +22,34 @@ const DEFAULT_REGISTRY_ALIAS = 'docker.io';
 export const parse = (specifier: string): ImageLocation => {
   const parts = specifier.split('/');
 
-  // the image name
-  let image = parts.pop() || '';
+  let match = /([^/]+\/)?(.+\/)?([^/]+)?$/;
+  let matches = specifier.match(match);
 
-  let namespace = parts.pop();
+  if(!matches) {
+    throw new Error('invalid image specifier: '+specifier)
+  }
+  // discard  the everything match
+  matches.shift()
+  matches = matches.filter((v)=>v)
+  
+  let trimSlashes = /^\/|\/$/g
 
-  let registry = parts[0];
+  let image:string = matches[matches.length-1]
+  if(image) image = image.replace(trimSlashes,'')
 
-  // mydockerregistry.com:5000/ubuntu
-  if (!registry && namespace) {
-    if (namespace.indexOf(':') > -1) {
-      if (!url.parse('a://' + namespace).port) {
-        throw new Error(
-            'if namespace has a : it should be th registry url and what follows the : must be the port number ' +
-            specifier);
-      }
-    }
-    registry = namespace;
+  let namespace:string|undefined = matches[matches.length-2]
+  if(namespace) namespace = namespace.replace(trimSlashes,'')
+
+  let registry:string|undefined = matches[matches.length-3]
+  if(registry) registry = registry.replace(trimSlashes,'')
+
+  if (!registry){
+    registry = namespace
     namespace = undefined;
   }
-
-  if (!registry || registry === DEFAULT_REGISTRY_ALIAS) {
+  
+  if(registry === DEFAULT_REGISTRY_ALIAS || !registry) {
+    namespace = 'library';
     registry = 'index.docker.io';
   }
 
@@ -89,7 +96,7 @@ export interface ImageLocation {
   protocol: string;
   registry: string;
   namespace?: string;
-  image: string;
+  image?: string;
   tag?: string;
   digest?: string;
 }

@@ -60,6 +60,18 @@ const specifiers: Array<{specifier: string, result: ImageLocation}> = [
       digest: undefined
     }
   },
+  //tests: https://github.com/google/nodejs-container-image-builder/issues/42
+  {
+    specifier:'gcr.io/myFirstProject/images/hello-world',
+    result:{
+      protocol:'https',
+      registry:'gcr.io',
+      namespace:'myFirstProject/images',
+      image:'hello-world',
+      tag:'latest',
+      digest:undefined
+    }
+  }
 ];
 
 
