@@ -28,18 +28,24 @@ export class RegistryClient {
   _auth: DockerAuthResult;
   _registry: string;
   _repository: string;
+  _protocol:string;
 
   constructor(registry: string, repository: string, auth: DockerAuthResult) {
     this._auth = auth;          // return from getToken
     this._registry = registry;  // gcr.io
     this._repository = repository;
+    this._protocol = 'https'
+    // this mirrors the behavior or docker itself. always https by default unless its localhost.
+    if(registry === 'localhost' || '127.0.0.1'){
+      this._protocol = 'http'
+    }
   }
 
   tags(): Promise<TagResult> {
     return new Promise((resolve, reject) => {
       request.get(
           {
-            url: `https://${this._registry}/v2/${this._repository}/tags/list`,
+            url: `${this._protocol}://${this._registry}/v2/${this._repository}/tags/list`,
             headers: {
               Authorization: this.authHeader(),
               Accept: 'application/vnd.docker.distribution.manifest.v2+json'
@@ -59,7 +65,7 @@ export class RegistryClient {
   manifest(tag: string): Promise<ManifestV2> {
     return new Promise((resolve, reject) => {
       const url =
-          `https://${this._registry}/v2/${this._repository}/manifests/${tag}`;
+          `${this._protocol}://${this._registry}/v2/${this._repository}/manifests/${tag}`;
 
       request.get(
           url, {
@@ -106,7 +112,7 @@ export class RegistryClient {
 
       // tslint:disable-next-line:no-any
       const req: any = request.put(
-          `https://${this._registry}/v2/${this._repository}/manifests/${tag}`, {
+          `${this._protocol}://${this._registry}/v2/${this._repository}/manifests/${tag}`, {
             headers: {
               Authorization: this.authHeader(),
               // TODO: read content type from mediaType field of manifest.
@@ -139,7 +145,7 @@ export class RegistryClient {
 
   blobExists(digest: string): Promise<boolean> {
     const url =
-        `https://${this._registry}/v2/${this._repository}/blobs/${digest}`;
+        `${this._protocol}://${this._registry}/v2/${this._repository}/blobs/${digest}`;
     const opts = {url, headers: {Authorization: this.authHeader()}};
 
     return new Promise((resolve, reject) => {
@@ -155,7 +161,7 @@ export class RegistryClient {
   blob(digest: string, stream?: boolean): Promise<Buffer|Readable> {
     return new Promise((resolve, reject) => {
       const url =
-          `https://${this._registry}/v2/${this._repository}/blobs/${digest}`;
+          `${this._protocol}://${this._registry}/v2/${this._repository}/blobs/${digest}`;
       let loop = 0;
       const fetch = (url: string) => {
         if (loop++ === 5) {
@@ -168,7 +174,7 @@ export class RegistryClient {
           followRedirect: false
         };
 
-        if (url.indexOf('https://' + this._registry) === -1) {
+        if (url.indexOf(`${this._protocol}://${this._registry}`) === -1) {
           delete opts.headers.Authorization;
         }
 
@@ -231,7 +237,7 @@ export class RegistryClient {
     return new Promise((resolve, reject) => {
       request.post(
           {
-            url: `https://${this._registry}/v2/${
+            url: `${this._protocol}://${this._registry}/v2/${
                 this._repository}/blobs/uploads/`,
             headers: {Authorization: this.authHeader(), 'Content-Length': 0}
           },
@@ -256,7 +262,7 @@ export class RegistryClient {
             if (contentLength && digest) {
               const putReq = request.put(
                   {
-                    url: `https://${this._registry}/v2/${
+                    url: `${this._protocol}://${this._registry}/v2/${
                         this._repository}/blobs/uploads/${uuid}?digest=${
                         digest}`,
                     headers: {
@@ -297,7 +303,7 @@ export class RegistryClient {
             const patchReq = request(
                 {
                   method: 'PATCH',
-                  uri: `https://${this._registry}/v2/${
+                  uri: `${this._protocol}://${this._registry}/v2/${
                       this._repository}/blobs/uploads/${uuid}`,
                   headers: {
                     Authorization: this.authHeader(),
@@ -323,7 +329,7 @@ export class RegistryClient {
                   const resp = request(
                       {
                         method: 'PUT',
-                        url: `https://${this._registry}/v2/${
+                        url: `${this._protocol}://${this._registry}/v2/${
                             this._repository}/blobs/uploads/${uuid}?digest=${
                             digest}`,
                         headers: {
@@ -368,7 +374,7 @@ export class RegistryClient {
       request(
           {
             method: 'POST',
-            uri: `https://${this._registry}/v2/${
+            uri: `${this._protocol}://${this._registry}/v2/${
                 this._repository}/blobs/uploads?mount=${digest}&from=${
                 fromRepository}`,
             headers: {Authorization: this.authHeader(), 'Content-Length': 0}
