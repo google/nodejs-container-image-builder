@@ -1,3 +1,12 @@
+# [3.1.0](https://github.com/google/nodejs-container-image-builder/compare/v3.0.0...v3.1.0) (2019-07-31)
+
+
+### Features
+
+* adding support for multi slash namespaces ([#43](https://github.com/google/nodejs-container-image-builder/issues/43)) ([390bab4](https://github.com/google/nodejs-container-image-builder/commit/390bab4))
+
+
+
 # [3.0.0](https://github.com/google/nodejs-container-image-builder/compare/v2.0.2...v3.0.0) (2019-07-29)
 
 
