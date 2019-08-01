@@ -10,8 +10,8 @@ describe(__filename, () => {
 
   before(async () => {
     registryProcess = await localRegistry.run();
-    // registryProcess.stdout.pipe(process.stdout,{end:false})
-    // registryProcess.stderr.pipe(process.stderr,{end:false})
+    registryProcess.stdout.pipe(process.stdout, {end: false});
+    registryProcess.stderr.pipe(process.stderr, {end: false});
     registryProcess.on('exit', (code) => {
       if (code) console.log('docker registry exited: ', code);
     });
