@@ -396,6 +396,8 @@ export class Image {
   }
 }
 
+// the ordinary auth mechanism that might work on any docker registry is not
+// implemented. https://docs.docker.com/registry/spec/auth/token/
 
 export const auth = async (
     imageArg: ImageLocation|string, scope: string, options?: AuthConfig) => {
