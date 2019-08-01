@@ -3,8 +3,8 @@ import * as http from 'http';
 import {AddressInfo} from 'net';
 
 export const run = async () => {
-  let port = await freePort();
-  port = 5001;
+  const port = await freePort();
+
   return await new Promise<cp.ChildProcess&
                            {port: number}>((resolve, reject) => {
     const proc = cp.spawn(
