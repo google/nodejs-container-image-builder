@@ -5,13 +5,15 @@ import {AddressInfo} from 'net';
 
 
 const registryImage = 'registry';
-if (process.platform === 'win32') {
-  // registryImage = 'stefanscherer/registry-windows';
-}
+// if (process.platform === 'win32') {
+// // it was taking over 40 seconds to pull this image so i moved it to an azure
+// pipelines step instead.
+// // this assumes you run teats on windows with linuxc container enabled.
+//  registryImage = 'stefanscherer/registry-windows';
+//}
 
 export const run = async (attempts = 0) => {
   const port = await freePort();
-
 
   return await new Promise<cp.ChildProcess&
                            {port: number}>((resolve, reject) => {

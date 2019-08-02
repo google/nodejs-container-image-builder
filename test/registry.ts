@@ -15,8 +15,9 @@ describe(__filename, () => {
            'Skipping registry integration test. There is no local registry image
      for windows available on docker hub'); this.skip(); return;
      }*/
-    if (process.platform === 'win32') {
-      port = 5000;
+    if (process.env.TEST_DOCKER_REGISTRY_PORT) {
+      port = +process.env.TEST_DOCKER_REGISTRY_PORT;
+      console.log('READING DOCKER REGISTRY PORT FROM ENVIRONMENT.');
       return;
     }
     registryProcess = await localRegistry.run();
