@@ -2,34 +2,28 @@
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
-version: 2
+
+version: 2.1
 jobs:
   build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/node:lts
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+      - checkout
+      - run:
+          name: "Testing"
+          command: echo "Hi"
+    docker_layer_caching: true
 
     working_directory: ~/repo
 
     steps:
-      - checkout
-      #- setup_remote_docker:
-      #   docker_layer_caching: true 
-      # Download and cache dependencies
-      - run: sudo apt-get update
-      - run: sudo apt-cache search docker
-      - run: sudo apt-get install docker-ce
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
-
+      - run: pwd && ls
       - run: npm install
 
       - save_cache:
