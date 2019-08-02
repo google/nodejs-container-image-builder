@@ -22,7 +22,8 @@ steps:
     dockerVersion: 17.09.0-ce
     releaseType: stable
 - script: |
-    docker pull --platform linux registry:latest
+    mkdir c:\registry
+    docker run -d -p 5000:5000 --restart=always --name registry -v C:\registry:C:\registry stefanscherer/registry-windows:2.6.2
 - script: |
     npm it
   displayName: 'npm test'
