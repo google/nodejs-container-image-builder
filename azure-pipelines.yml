@@ -14,13 +14,15 @@ steps:
   inputs:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
+- script: |
+    DISM /Online /Enable-Feature /All /FeatureName:Microsoft-Hyper-V
 - task: DockerInstaller@0
   displayName: Docker Installer
   inputs:
     dockerVersion: 17.09.0-ce
     releaseType: stable
 - script: |
-    DISM /Online /Enable-Feature /All /FeatureName:Microsoft-Hyper-V
+    docker pull --platform linux registry:latest
 - script: |
     npm it
   displayName: 'npm test'
