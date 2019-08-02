@@ -39,4 +39,3 @@ jobs:
       - run: echo $_JSON_APPLICATION_CREDENTIALS > ./creds.json
       # run tests!
       - run: GOOGLE_APPLICATION_CREDENTIALS=`realpath ./creds.json` npm test
-webcam
