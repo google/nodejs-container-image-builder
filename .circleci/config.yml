@@ -18,8 +18,7 @@ jobs:
       - checkout
       - run:
           name: "install node"
-          command: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
-          command: nvm i 12
+          command: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash && nvm i 12
 
 
       - restore_cache:
