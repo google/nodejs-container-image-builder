@@ -23,6 +23,10 @@ export const run = async () => {
     proc.port = port;
     proc.stdin.end();
     const timer = setTimeout(() => {
+      if(process.platform === 'win32'){
+        resolve(proc)
+        return;
+      }
       proc.kill();
       reject(new Error(
           'docker registry did not start listening within 10 seconds.'));
