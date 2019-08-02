@@ -21,6 +21,8 @@ jobs:
       #- setup_remote_docker:
       #   docker_layer_caching: true 
       # Download and cache dependencies
+      - run: sudo apt-get update
+      - run: sudo apt-cache search docker
       - run: sudo apt-get install docker-ce
       - restore_cache:
           keys:
@@ -37,3 +39,4 @@ jobs:
       - run: echo $_JSON_APPLICATION_CREDENTIALS > ./creds.json
       # run tests!
       - run: GOOGLE_APPLICATION_CREDENTIALS=`realpath ./creds.json` npm test
+webcam
