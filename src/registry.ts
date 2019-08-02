@@ -18,6 +18,7 @@ import * as request from 'request';
 import {Response} from 'request';
 import {Readable} from 'stream';
 import * as urlModule from 'url';
+import {URL, URLSearchParams} from 'url';
 
 import {DockerAuthResult} from './credentials-helper';
 
@@ -25,21 +26,31 @@ import {DockerAuthResult} from './credentials-helper';
 // https://github.com/opencontainers/distribution-spec/blob/master/spec.md
 
 export class RegistryClient {
-  _auth: DockerAuthResult;
+  _auth?: DockerAuthResult;
   _registry: string;
   _repository: string;
+  _protocol: string;
 
-  constructor(registry: string, repository: string, auth: DockerAuthResult) {
+  constructor(registry: string, repository: string, auth?: DockerAuthResult) {
     this._auth = auth;          // return from getToken
     this._registry = registry;  // gcr.io
     this._repository = repository;
+    this._protocol = 'https';
+    // this mirrors the behavior or docker itself. always https by default
+    // unless its localhost. this should likely be refactored to support image
+    // specifiers because i do this better there.
+    const hostname = new URL('http://' + registry).hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      this._protocol = 'http';
+    }
   }
 
   tags(): Promise<TagResult> {
     return new Promise((resolve, reject) => {
       request.get(
           {
-            url: `https://${this._registry}/v2/${this._repository}/tags/list`,
+            url: `${this._protocol}://${this._registry}/v2/${
+                this._repository}/tags/list`,
             headers: {
               Authorization: this.authHeader(),
               Accept: 'application/vnd.docker.distribution.manifest.v2+json'
@@ -58,8 +69,8 @@ export class RegistryClient {
 
   manifest(tag: string): Promise<ManifestV2> {
     return new Promise((resolve, reject) => {
-      const url =
-          `https://${this._registry}/v2/${this._repository}/manifests/${tag}`;
+      const url = `${this._protocol}://${this._registry}/v2/${
+          this._repository}/manifests/${tag}`;
 
       request.get(
           url, {
@@ -106,7 +117,9 @@ export class RegistryClient {
 
       // tslint:disable-next-line:no-any
       const req: any = request.put(
-          `https://${this._registry}/v2/${this._repository}/manifests/${tag}`, {
+          `${this._protocol}://${this._registry}/v2/${
+              this._repository}/manifests/${tag}`,
+          {
             headers: {
               Authorization: this.authHeader(),
               // TODO: read content type from mediaType field of manifest.
@@ -138,8 +151,8 @@ export class RegistryClient {
   }
 
   blobExists(digest: string): Promise<boolean> {
-    const url =
-        `https://${this._registry}/v2/${this._repository}/blobs/${digest}`;
+    const url = `${this._protocol}://${this._registry}/v2/${
+        this._repository}/blobs/${digest}`;
     const opts = {url, headers: {Authorization: this.authHeader()}};
 
     return new Promise((resolve, reject) => {
@@ -154,8 +167,8 @@ export class RegistryClient {
   blob(digest: string, stream?: true): Promise<Readable>;
   blob(digest: string, stream?: boolean): Promise<Buffer|Readable> {
     return new Promise((resolve, reject) => {
-      const url =
-          `https://${this._registry}/v2/${this._repository}/blobs/${digest}`;
+      const url = `${this._protocol}://${this._registry}/v2/${
+          this._repository}/blobs/${digest}`;
       let loop = 0;
       const fetch = (url: string) => {
         if (loop++ === 5) {
@@ -168,7 +181,7 @@ export class RegistryClient {
           followRedirect: false
         };
 
-        if (url.indexOf('https://' + this._registry) === -1) {
+        if (url.indexOf(`${this._protocol}://${this._registry}`) === -1) {
           delete opts.headers.Authorization;
         }
 
@@ -199,8 +212,6 @@ export class RegistryClient {
           if (err) return reject(err);
 
           if (res.headers.location) {
-            // console.log('location redirect -->
-            // ',opts.url,res.headers.location);
             return fetch(urlModule.resolve(url, res.headers.location));
           }
 
@@ -231,7 +242,7 @@ export class RegistryClient {
     return new Promise((resolve, reject) => {
       request.post(
           {
-            url: `https://${this._registry}/v2/${
+            url: `${this._protocol}://${this._registry}/v2/${
                 this._repository}/blobs/uploads/`,
             headers: {Authorization: this.authHeader(), 'Content-Length': 0}
           },
@@ -241,24 +252,24 @@ export class RegistryClient {
             }
 
 
-            // TODO: use the location header directly instead of the legacy
+            // use the location header directly instead of the legacy
             // header. docker-upload-uuid see
             // https://github.com/opencontainers/distribution-spec/pull/38 for
             // context (note from jonjohnson@)
-            let uuid = res.headers['docker-upload-uuid'] ||
-                (res.headers.location || '').split('/').pop();
-
-            if (!uuid) {
+            if (!res.headers.location) {
               return reject(new Error(
-                  'request to start upload did not provide uuid in header docker-upload-uuid.'));
+                  'did not get location header to complete upload from upload post.'));
             }
 
+            let uploadLocation = new URL(res.headers.location);
+
             if (contentLength && digest) {
+              // add digest to query
+              uploadLocation.searchParams.set('digest', digest);
+              //`${this._protocol}://${this._registry}/v2/${this._repository}/blobs/uploads/${uuid}?digest=${digest}`
               const putReq = request.put(
                   {
-                    url: `https://${this._registry}/v2/${
-                        this._repository}/blobs/uploads/${uuid}?digest=${
-                        digest}`,
+                    url: uploadLocation + '',
                     headers: {
                       Authorization: this.authHeader(),
                       'Content-Length': contentLength,
@@ -273,7 +284,7 @@ export class RegistryClient {
                     if (res.statusCode !== 201) {
                       return reject(new Error(
                           'unexpected status code ' + res.statusCode +
-                          ' for upload.'));
+                          ' for upload. ' + body));
                     }
 
                     resolve({
@@ -297,35 +308,32 @@ export class RegistryClient {
             const patchReq = request(
                 {
                   method: 'PATCH',
-                  uri: `https://${this._registry}/v2/${
-                      this._repository}/blobs/uploads/${uuid}`,
+                  uri: uploadLocation + '',
                   headers: {
                     Authorization: this.authHeader(),
                     'Content-Type': 'application/octet-stream'
                   }
                 },
-                (err: Error, res: Response) => {
+                (err: Error, res: Response, body: Buffer) => {
                   if (err) return reject(err);
                   if (res.statusCode !== 204) {
                     return reject(new Error(
                         'unexpected status code ' + res.statusCode +
                         ' for patch upload (111)' +
-                        `https://${this._registry}/v2/${
-                            this._repository}/blobs/uploads/${uuid}`));
+                        `${uploadLocation} ${body}`));
                   }
 
-                  uuid = res.headers['docker-upload-uuid'] ?
-                      res.headers['docker-upload-uuid'] :
-                      uuid;
+                  // this value changes with every patch request
+                  if (res.headers.location) {
+                    uploadLocation = new URL(res.headers.location);
+                  }
 
                   const digest = 'sha256:' + hash.digest('hex');
-
+                  uploadLocation.searchParams.set('digest', digest);
                   const resp = request(
                       {
                         method: 'PUT',
-                        url: `https://${this._registry}/v2/${
-                            this._repository}/blobs/uploads/${uuid}?digest=${
-                            digest}`,
+                        url: uploadLocation + '',
                         headers: {
                           Authorization: this.authHeader(),
                           'Content-Length': 0,
@@ -368,7 +376,7 @@ export class RegistryClient {
       request(
           {
             method: 'POST',
-            uri: `https://${this._registry}/v2/${
+            uri: `${this._protocol}://${this._registry}/v2/${
                 this._repository}/blobs/uploads?mount=${digest}&from=${
                 fromRepository}`,
             headers: {Authorization: this.authHeader(), 'Content-Length': 0}
@@ -386,6 +394,10 @@ export class RegistryClient {
   }
 
   private authHeader() {
+    if (!this._auth) {
+      return undefined;
+    }
+
     if (this._auth.token) {
       return `Bearer ${this._auth.token}`;
     } else {
@@ -394,6 +406,14 @@ export class RegistryClient {
               .toString('base64');
     }
   }
+
+  // so there is a generic way to auth with all v2 registries
+  // POST registry/v2/
+  // if it responds with 401 you are using a registry that requires auth
+  // parse authentication realm for login url
+  // post to login url with query string parameters
+  // ... details here \/
+  // https://docs.docker.com/registry/spec/auth/token/
 
   /*static auth(registry: string, repo: string, token: string): Promise<string>
   { return new Promise((resolve, reject) => { const url = 'https://' + registry
