@@ -19,6 +19,7 @@ jobs:
       - run: curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
       - run: sudo apt-get install --force-yes --allow-downgrades --allow-remove-essential --allow-change-held-packages -y nodejs
       - run: which node && node --version && stat /usr/local/bin/node || true
+      - run: nvm deactivate
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
