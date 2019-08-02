@@ -30,7 +30,7 @@ export const run = async () => {
       proc.kill();
       reject(new Error(
           'docker registry did not start listening within 10 seconds.'));
-    }, 10000);
+    }, 30000);
 
     const exitHandler = (code: number) => {
       clearTimeout(timer);

@@ -5,8 +5,8 @@
   "main": "build/src/index.js",
   "keywords": [],
   "scripts": {
-    "test": "nyc mocha -t 30000 --require source-map-support/register build/test/*.js",
-    "test-one": "nyc mocha -t 30000 --require source-map-support/register $1",
+    "test": "nyc mocha -t 60000 --require source-map-support/register build/test/*.js",
+    "test-one": "nyc mocha -t 60000 --require source-map-support/register $1",
     "check": "gts check",
     "clean": "gts clean",
     "compile": "tsc -p .",
