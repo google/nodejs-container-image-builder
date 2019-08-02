@@ -4,13 +4,14 @@ import {AddressInfo} from 'net';
 
 
 
-let registryImage = 'registry';
+const registryImage = 'registry';
 if (process.platform === 'win32') {
-  //registryImage = 'stefanscherer/registry-windows';
+  // registryImage = 'stefanscherer/registry-windows';
 }
 
-export const run = async (attempts:number = 0) => {
+export const run = async (attempts = 0) => {
   const port = await freePort();
+
 
   return await new Promise<cp.ChildProcess&
                            {port: number}>((resolve, reject) => {

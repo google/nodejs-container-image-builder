@@ -7,7 +7,7 @@ import * as localRegistry from './util/local-registry';
 
 describe(__filename, () => {
   let registryProcess: ChildProcess&{port: number};
-
+  let port: number;
 
   before(async () => {
     /*if (process.platform === 'win32') {
@@ -15,8 +15,12 @@ describe(__filename, () => {
            'Skipping registry integration test. There is no local registry image
      for windows available on docker hub'); this.skip(); return;
      }*/
-
+    if (process.platform === 'win32') {
+      port = 5000;
+      return;
+    }
     registryProcess = await localRegistry.run();
+    port = registryProcess.port;
     registryProcess.stdout.pipe(process.stdout, {end: false});
     registryProcess.stderr.pipe(process.stderr, {end: false});
     registryProcess.on('exit', (code) => {
@@ -31,8 +35,7 @@ describe(__filename, () => {
   it('uploads blob to local docker registry', async () => {
     const blob = Buffer.from('hello world');
 
-    const client =
-        new RegistryClient('localhost:' + registryProcess.port, 'node');
+    const client = new RegistryClient('localhost:' + port, 'node');
 
     const result = await client.upload(blob);
 

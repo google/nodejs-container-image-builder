@@ -12,7 +12,7 @@ pool:
 steps:
 - task: NodeTool@0
   inputs:
-    versionSpec: '10.x'
+    versionSpec: '12.x'
   displayName: 'Install Node.js'
 - script: |
     DISM /Online /Enable-Feature /All /FeatureName:Microsoft-Hyper-V
@@ -24,6 +24,7 @@ steps:
 - script: |
     mkdir c:\registry
     docker run -d -p 5000:5000 --restart=always --name registry -v C:\registry:C:\registry stefanscherer/registry-windows:2.6.2
+    docker ps
 - script: |
     npm it
   displayName: 'npm test'
