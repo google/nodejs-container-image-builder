@@ -6,10 +6,10 @@ import {AddressInfo} from 'net';
 
 let registryImage = 'registry';
 if (process.platform === 'win32') {
-  registryImage = 'stefanscherer/registry-windows';
+  //registryImage = 'stefanscherer/registry-windows';
 }
 
-export const run = async () => {
+export const run = async (attempts:number = 0) => {
   const port = await freePort();
 
   return await new Promise<cp.ChildProcess&
@@ -23,8 +23,8 @@ export const run = async () => {
     proc.port = port;
     proc.stdin.end();
     const timer = setTimeout(() => {
-      if(process.platform === 'win32'){
-        resolve(proc)
+      if (process.platform === 'win32') {
+        resolve(proc);
         return;
       }
       proc.kill();

@@ -20,5 +20,7 @@ steps:
     dockerVersion: 17.09.0-ce
     releaseType: stable
 - script: |
+    DISM /Online /Enable-Feature /All /FeatureName:Microsoft-Hyper-V
+- script: |
     npm it
   displayName: 'npm test'
