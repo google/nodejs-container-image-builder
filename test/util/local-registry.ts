@@ -3,14 +3,21 @@ import * as http from 'http';
 import {AddressInfo} from 'net';
 
 
+
+let registryImage = 'registry';
+if (process.platform === 'win32') {
+  registryImage = 'stefanscherer/registry-windows';
+}
+
 export const run = async () => {
   const port = await freePort();
 
   return await new Promise<cp.ChildProcess&
                            {port: number}>((resolve, reject) => {
-    const proc = cp.spawn(
-                     'docker', ['run', '-p', port + ':5000', 'registry:latest'],
-                     {stdio: 'pipe'}) as cp.ChildProcess &
+    const proc =
+        cp.spawn(
+            'docker', ['run', '-p', port + ':5000', registryImage + ':latest'],
+            {stdio: 'pipe'}) as cp.ChildProcess &
         {port: number};
 
     proc.port = port;

@@ -8,7 +8,14 @@ import * as localRegistry from './util/local-registry';
 describe(__filename, () => {
   let registryProcess: ChildProcess&{port: number};
 
+
   before(async () => {
+    /*if (process.platform === 'win32') {
+       console.log(
+           'Skipping registry integration test. There is no local registry image
+     for windows available on docker hub'); this.skip(); return;
+     }*/
+
     registryProcess = await localRegistry.run();
     registryProcess.stdout.pipe(process.stdout, {end: false});
     registryProcess.stderr.pipe(process.stderr, {end: false});
