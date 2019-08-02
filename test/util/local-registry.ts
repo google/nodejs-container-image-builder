@@ -8,7 +8,6 @@ export const run = async () => {
 
   return await new Promise<cp.ChildProcess&
                            {port: number}>((resolve, reject) => {
-
     const proc = cp.spawn(
                      'docker', ['run', '-p', port + ':5000', 'registry:latest'],
                      {stdio: 'pipe'}) as cp.ChildProcess &
@@ -46,17 +45,16 @@ export const run = async () => {
         clearTimeout(timer);
         resolve(proc);
         // re-emit data that we've consumed.
-        //proc.stdout.emit('data', out);
-        //proc.stderr.emit('data', bufs);
+        // proc.stdout.emit('data', out);
+        // proc.stderr.emit('data', bufs);
         proc.stdout.unshift(out);
         proc.stderr.unshift(bufs);
       }
     };
 
-    proc.stdout.on('data',outHandler)
-    proc.stderr.on('data',errHandler)
+    proc.stdout.on('data', outHandler);
+    proc.stderr.on('data', errHandler);
     proc.once('exit', exitHandler);
-
   });
 };
 

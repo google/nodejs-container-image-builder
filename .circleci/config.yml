@@ -18,9 +18,10 @@ jobs:
 
     steps:
       - checkout
-      - setup_remote_docker:
-         docker_layer_caching: true 
+      #- setup_remote_docker:
+      #   docker_layer_caching: true 
       # Download and cache dependencies
+      - run: sudo apt-get install docker-ce
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "package.json" }}
