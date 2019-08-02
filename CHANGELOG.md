@@ -1,3 +1,12 @@
+# [3.2.0](https://github.com/google/nodejs-container-image-builder/compare/v3.1.0...v3.2.0) (2019-08-02)
+
+
+### Features
+
+* allow access to un-authenticated docker registries ([#44](https://github.com/google/nodejs-container-image-builder/issues/44)) ([7021a18](https://github.com/google/nodejs-container-image-builder/commit/7021a18))
+
+
+
 # [3.1.0](https://github.com/google/nodejs-container-image-builder/compare/v3.0.0...v3.1.0) (2019-07-31)
 
 
