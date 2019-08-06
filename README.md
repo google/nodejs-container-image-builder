@@ -50,8 +50,10 @@ Docker hub and gcr.io have custom auth plugins.  If you already have a token or 
 
 ```js
 const image = new Image('node:lts-slim','myspecialregistry.io/my-project/my-image',{
-    'myspecialregistry.io':{
-        token:"xxxxxxxxxxx"
+    "auth":{
+        'myspecialregistry.io':{
+            token:"xxxxxxxxxxx"
+        }
     }
 })
 ```
