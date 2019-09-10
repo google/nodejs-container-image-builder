@@ -80,7 +80,7 @@ export const pack =
 
       let working = false;
       let paused = 0;
-
+      let ended = false;
       const work = () => {
         if (working || paused) {
           if (paused === 1) {
@@ -90,7 +90,8 @@ export const pack =
         }
         const obj = queue.shift();
         if (!obj) {
-          if (walkEnded) {
+          if (walkEnded && !ended) {
+            ended = true;
             pack.end();
           }
           return;
