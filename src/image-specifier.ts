@@ -49,7 +49,7 @@ export const parse = (specifier: string): ImageLocation => {
   }
 
   if (registry === DEFAULT_REGISTRY_ALIAS || !registry) {
-    namespace = 'library';
+    namespace = namespace || 'library';
     registry = 'index.docker.io';
   }
 
