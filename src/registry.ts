@@ -316,12 +316,6 @@ export class RegistryClient {
                 },
                 (err: Error, res: Response, body: Buffer) => {
                   if (err) return reject(err);
-                  if (res.statusCode !== 204 && res.statusCode !== 202) {
-                    return reject(new Error(
-                        'unexpected status code ' + res.statusCode +
-                        ' for patch upload (111)' +
-                        `${uploadLocation} ${body}`));
-                  }
 
                   // this value changes with every patch request
                   if (res.headers.location) {
