@@ -71,6 +71,17 @@ const specifiers: Array<{specifier: string, result: ImageLocation}> = [
       tag: 'latest',
       digest: undefined
     }
+  },
+  {
+    specifier: 'docker.io/usernamespace/hello-world',
+    result: {
+      protocol: 'https',
+      registry: 'index.docker.io',
+      namespace: 'usernamespace',
+      image: 'hello-world',
+      tag: 'latest',
+      digest: undefined
+    }
   }
 ];
 
