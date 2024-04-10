@@ -42,7 +42,7 @@
     "micromatch": "^3.1.10",
     "p-retry": "^3.0.1",
     "request": "^2.88.0",
-    "tar": "^4.4.8",
+    "tar": "^6.2.1",
     "walkdir": "^0.4.0"
   },
   "publishConfig": {
